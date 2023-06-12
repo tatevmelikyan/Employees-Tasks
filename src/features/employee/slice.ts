@@ -1,11 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../../app/store";
-import { IEmployee } from "../../types";
+import { IEmployee, ITask } from "../../types";
 
 interface EmployeeState {
   info: IEmployee | null;
-  tasks: [];
+  tasks: ITask[];
   loading: "idle" | "loading";
 }
 
@@ -21,33 +19,47 @@ const fetchEmployee = createAsyncThunk(
     const response = await fetch(
       `https://rocky-temple-83495.herokuapp.com/employees/${id}`
     );
-    console.log(response, "response");
-
     return await response.json();
   }
 );
 
+const fetchEmployeeTasks = createAsyncThunk(
+  "employee/fetchTasks",
+  async ({ id }: { id: string }) => {
+    const response = await fetch(
+      `https://rocky-temple-83495.herokuapp.com/tasks?employeeId=${id}`
+    );
+    return await response.json();
+  }
+);
 export const employeeSlice = createSlice({
   name: "employees",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchEmployee.pending, (state) => {
+      .addCase(fetchEmployee.pending || fetchEmployeeTasks.pending, (state) => {
         state.loading = "loading";
       })
       .addCase(fetchEmployee.fulfilled, (state, { payload }) => {
         state.info = payload;
         state.loading = "idle";
       })
-      .addCase(fetchEmployee.rejected, (state, { payload }) => {
+      .addCase(
+        fetchEmployee.rejected || fetchEmployeeTasks.rejected,
+        (state, { payload }) => {
+          state.loading = "idle";
+          console.error(payload);
+        }
+      )
+      .addCase(fetchEmployeeTasks.fulfilled, (state, { payload }) => {
+        state.tasks = payload;
         state.loading = "idle";
-        console.error(payload);
       });
   },
 });
 
 export const {} = employeeSlice.actions;
-export { fetchEmployee };
+export { fetchEmployee, fetchEmployeeTasks };
 
 export default employeeSlice.reducer;
