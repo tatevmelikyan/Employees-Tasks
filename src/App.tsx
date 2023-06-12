@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navigation from "./features/navigation/Navigation";
 import Employees from "./features/employees/Employees";
 import Tasks from "./features/tasks/Tasks";
@@ -11,12 +11,12 @@ function App() {
   return (
     <div className="App">
       <Navigation />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/employees" element={<Employees />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/employees/:id" element={<Employee />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/employees/:id" element={<Employee />} />
+      </Routes>
     </div>
   );
 }
