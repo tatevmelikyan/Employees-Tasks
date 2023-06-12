@@ -1,9 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
+import { IEmployee } from "../../types";
 
 interface EmployeesState {
-  entities: [];
+  entities: IEmployee[];
   loading: "idle" | "loading";
 }
 
