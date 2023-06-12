@@ -1,9 +1,11 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
 import employeesReducer from '../features/employees/slice';
+import employeeReducer from '../features/employee/slice';
 
 export const store = configureStore({
   reducer: {
-    employees: employeesReducer
+    employees: employeesReducer,
+    employee: employeeReducer
   },
 });
 

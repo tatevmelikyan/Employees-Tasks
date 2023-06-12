@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { fetchAllEmployees, fetchEmployeesPerPage } from "./slice";
 import Pagination from "../pagination/Pagination";
 import AddEmployeeForm from "./AddEmployeeForm";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Employees: FC = () => {
   const dispatch = useAppDispatch();
@@ -15,6 +15,7 @@ const Employees: FC = () => {
   const [dataPerPage, setDataPerPage] = useState(2);
   const [currentPage, setCurrentPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false)
+  const navigate = useNavigate()
   useEffect(() => {
     dispatch(fetchAllEmployees());
   }, [dispatch]);
@@ -35,7 +36,7 @@ const Employees: FC = () => {
       
       {employees.map((employee) => {
         return (
-          <div key={employee.id} className="employee__container">
+          <div key={employee.id} className="employee__container" onClick={() => navigate(`/employees/${employee.id}`)}>
             <p>ID: {employee.id}</p>
             <p>Name: {employee.name}</p>
             <p>Surname: {employee.surname}</p>
