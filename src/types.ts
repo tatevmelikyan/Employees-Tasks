@@ -5,3 +5,11 @@ export interface IEmployee {
     email: string;
     position: string
   }
+
+
+  export interface INewEmployee {
+    name: string;
+    surname: string;
+    email: string;
+    position: string
+  }
