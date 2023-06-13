@@ -1,7 +1,8 @@
 import React, { FC, useState, useEffect } from "react";
+import { IEmployee } from "../../types";
 
 interface IPaginationProps {
-  totalData: number;
+  totalData: IEmployee[];
   dataPerPage: number;
   currentPage: number;
   setCurrentPage: (pageNumber: number) => void;
@@ -16,7 +17,7 @@ const Pagination: FC<IPaginationProps> = ({
   const [pagesCount, setPagesCount] = useState(0);
 
   useEffect(() => {
-    setPagesCount(Math.ceil(totalData / dataPerPage));
+    setPagesCount(Math.ceil(totalData.length / dataPerPage));
   }, [totalData, dataPerPage]);
 
   const handlePageChange = (pageNumber: number) => {

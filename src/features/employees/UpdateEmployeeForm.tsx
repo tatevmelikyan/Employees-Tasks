@@ -1,68 +1,51 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
-import { INewEmployee } from "../../types";
-import { useAppDispatch } from "../../app/hooks";
-import { fetchAllEmployees } from "./slice";
+import { IEmployee } from "../../types";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { updateEmployee } from "./slice";
 
-const AddEmployeeForm = ({
+const UpdateEmployeeForm = ({
   setOpen,
+  employeeId,
 }: {
   setOpen: (isOpen: boolean) => void;
+  employeeId: string;
 }) => {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
-  const [newEmployee, setNewEmployee] = useState<INewEmployee>({
-    name: "",
-    surname: "",
-    email: "",
-    position: "",
-  });
+  const loading = useAppSelector((state) => state.employees.loading);
+  const employee = useAppSelector((state) =>
+    state.employees.pageEmployees.find((employee) => employee.id === employeeId)
+  );
+  console.log(employee, "employee to update");
+
+  const [updatedEmployee, setUpdatedEmployee] = useState<IEmployee>(
+    employee as IEmployee
+  );
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name, "name of el");
-
-    setNewEmployee((prev) => ({
+    setUpdatedEmployee((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
-    fetch("https://rocky-temple-83495.herokuapp.com/employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newEmployee),
-    })
-      .then((res) => {
-        setLoading(false);
-        setNewEmployee({
-          name: "",
-          surname: "",
-          email: "",
-          position: "",
-        });
-        setOpen(false);
-        dispatch(fetchAllEmployees());
-      })
-      .catch((err) => console.error(err));
+    dispatch(updateEmployee(updatedEmployee)).then(() => {
+      handleCancel();
+    });
   };
 
   return (
-    <>
-      <div className="popup__background" onClick={() => setOpen(false)}></div>
+    <div>
+      {loading && <div className="loading">Loading...</div>}
+      <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(false);
-          }}
-        >
-          X
-        </button>
+        <button onClick={handleCancel}>X</button>
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name">Name:</label>
@@ -70,7 +53,7 @@ const AddEmployeeForm = ({
               type="text"
               id="name"
               name="name"
-              value={newEmployee.name}
+              value={updatedEmployee.name}
               required
               onChange={handleInputChange}
             />
@@ -81,7 +64,7 @@ const AddEmployeeForm = ({
               type="text"
               id="surname"
               name="surname"
-              value={newEmployee.surname}
+              value={updatedEmployee.surname}
               required
               onChange={handleInputChange}
             />
@@ -92,7 +75,7 @@ const AddEmployeeForm = ({
               type="email"
               id="email"
               name="email"
-              value={newEmployee.email}
+              value={updatedEmployee.email}
               required
               onChange={handleInputChange}
             />
@@ -103,20 +86,16 @@ const AddEmployeeForm = ({
               type="text"
               id="position"
               name="position"
-              value={newEmployee.position}
+              value={updatedEmployee.position}
               required
               onChange={handleInputChange}
             />
           </div>
-          {loading ? (
-            <button disabled>Loading...</button>
-          ) : (
-            <button>Save</button>
-          )}
+          <button>Save</button>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 
-export default AddEmployeeForm;
+export default UpdateEmployeeForm;

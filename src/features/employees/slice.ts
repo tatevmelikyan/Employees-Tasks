@@ -2,17 +2,20 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../app/store";
 import { IEmployee } from "../../types";
+import { error } from "console";
 
 interface EmployeesState {
-  employeesTotalNum: number;
-  items: IEmployee[];
-  loading: "idle" | "loading";
+  allEmployees: IEmployee[];
+  pageEmployees: IEmployee[];
+  loading: boolean;
+  error: string | null;
 }
 
 const initialState: EmployeesState = {
-  employeesTotalNum: 0,
-  items: [],
-  loading: "idle",
+  allEmployees: [],
+  pageEmployees: [],
+  loading: false,
+  error: null,
 };
 
 const fetchAllEmployees = createAsyncThunk(
@@ -21,9 +24,11 @@ const fetchAllEmployees = createAsyncThunk(
     const response = await fetch(
       "https://rocky-temple-83495.herokuapp.com/employees"
     );
-    console.log(response, "response");
-
-    return await response.json();
+    if (!response.ok) {
+      throw new Error("Failed to fetch employees");
+    }
+    const data = response.json();
+    return data;
   }
 );
 
@@ -44,38 +49,126 @@ const fetchEmployeesPerPage = createAsyncThunk(
     return await response.json();
   }
 );
-export const employeesSlice = createSlice({
+
+const updateEmployee = createAsyncThunk(
+  "employees/updateEmployee",
+  async (employee: IEmployee) => {
+    const response = await fetch(
+      `https://rocky-temple-83495.herokuapp.com/employees/${employee.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employee),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update employee.");
+    }
+    const updatedEmployee = await response.json();
+    return updatedEmployee;
+  }
+);
+
+const deleteEmployee = createAsyncThunk(
+  "employees/deleteEmployee",
+  async (employeeId: string) => {
+    console.log(employeeId, "id in delete");
+
+    const response = await fetch(
+      `https://rocky-temple-83495.herokuapp.com/employees/${employeeId}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (!response.ok) {
+      throw new Error("Failed to delete employee");
+    }
+  }
+);
+
+const employeesSlice = createSlice({
   name: "employees",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(
-        fetchAllEmployees.pending || fetchEmployeesPerPage.pending,
-        (state, action) => {
-          state.loading = "loading";
-        }
-      )
+      .addCase(fetchAllEmployees.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchAllEmployees.fulfilled, (state, { payload }) => {
-        console.log(payload, "payload");
-        state.employeesTotalNum = payload.length;
-        state.loading = "idle";
+        state.loading = false;
+        state.error = null;
+        state.allEmployees = payload;
+      })
+      .addCase(fetchAllEmployees.rejected, (state, { error }) => {
+        state.loading = false;
+        state.error = error.message as string;
+      })
+      .addCase(fetchEmployeesPerPage.pending, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(fetchEmployeesPerPage.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        state.pageEmployees = payload;
+      })
+      .addCase(fetchEmployeesPerPage.rejected, (state, { error }) => {
+        state.loading = false;
+        state.error = error.message as string;
+      })
+      .addCase(updateEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(
-        fetchAllEmployees.rejected || fetchEmployeesPerPage.rejected,
-        (state, { payload }) => {
-          state.loading = "idle";
-          console.error(payload);
+        updateEmployee.fulfilled,
+        (state, { payload: updatedEmployee }) => {
+          state.loading = false;
+          state.error = null;
+          const index = state.allEmployees.findIndex(
+            (employee) => employee.id === updatedEmployee.id
+          );
+          if (index !== -1) {
+            state.allEmployees[index] = updatedEmployee;
+          }
         }
       )
-      .addCase(fetchEmployeesPerPage.fulfilled, (state, { payload }) => {
-        state.loading = "idle";
-        state.items = payload;
+      .addCase(updateEmployee.rejected, (state, { error }) => {
+        state.loading = false;
+        state.error = error.message as string;
+      })
+      .addCase(deleteEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteEmployee.fulfilled, (state, { meta }) => {
+        state.loading = false;
+        state.error = null;
+        state.allEmployees = state.allEmployees.filter(
+          (employee) => employee.id !== meta.arg
+        );
+        state.pageEmployees = state.pageEmployees.filter(
+          (employee) => employee.id !== meta.arg
+        );
+      })
+      .addCase(deleteEmployee.rejected, (state, { error }) => {
+        state.loading = false;
+        state.error = error.message as string;
       });
   },
 });
 
 export const {} = employeesSlice.actions;
-export { fetchAllEmployees, fetchEmployeesPerPage };
+export {
+  fetchAllEmployees,
+  fetchEmployeesPerPage,
+  updateEmployee,
+  deleteEmployee,
+};
 
 export default employeesSlice.reducer;
