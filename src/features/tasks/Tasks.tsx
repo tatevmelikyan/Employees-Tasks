@@ -4,6 +4,7 @@ import Task from "./Task";
 import {} from "../employees/slice";
 import { fetchAllTasks } from "./slice";
 import CreateTaskForm from "./CreateTaskForm";
+import UpdateTaskForm from "./UpdateTaskForm";
 
 const Tasks: FC = () => {
   const dispatch = useAppDispatch();
@@ -11,6 +12,9 @@ const Tasks: FC = () => {
   const loading = useAppSelector((state) => state.tasks.loading);
   const error = useAppSelector((state) => state.tasks.error);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
+  const [updatedTaskOpen, setUpdateTaskOpen] = useState(false);
+  const [taskToUpdate, setTaskToUpdate] = useState("");
+
 
   useEffect(() => {
     dispatch(fetchAllTasks());
@@ -20,7 +24,10 @@ const Tasks: FC = () => {
     setCreateTaskOpen(!createTaskOpen);
   };
 
-  console.log(createTaskOpen, "form open");
+  const handleOpenUpdateTask = () => {
+    setUpdateTaskOpen(!updatedTaskOpen);
+  };
+
 
   return (
     <div className="tasks__page">
@@ -32,9 +39,25 @@ const Tasks: FC = () => {
           <CreateTaskForm handleOpenCreateTask={handleOpenCreateTask} />
         )}
       </div>
+      {updatedTaskOpen && (
+        <UpdateTaskForm
+          handleOpenUpdateTask={handleOpenUpdateTask}
+          taskId={taskToUpdate}
+        />
+      )}
       <div className="tasks__container">
         {tasks.map((task) => (
-          <Task key={task.id} task={task} />
+          <div>
+            <Task key={task.id} task={task} />
+            <button
+              onClick={() => {
+                handleOpenUpdateTask();
+                setTaskToUpdate(task.id);
+              }}
+            >
+              Edit
+            </button>
+          </div>
         ))}
       </div>
     </div>

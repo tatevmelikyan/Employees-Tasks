@@ -1,26 +1,24 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { createTask } from "./slice";
-import { INewTask } from "../../types";
+import { updateTask } from "./slice";
+import { ITask } from "../../types";
 import { fetchAllEmployees } from "../employees/slice";
 
-const CreateTaskForm = ({
-  handleOpenCreateTask,
+const UpdateTaskForm = ({
+  handleOpenUpdateTask,
+  taskId,
 }: {
-  handleOpenCreateTask: () => void;
+  handleOpenUpdateTask: () => void;
+  taskId: string;
 }) => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.tasks.loading);
-  const error = useAppSelector(state => state.tasks.error)
+  const error = useAppSelector((state) => state.tasks.error);
   const employees = useAppSelector((state) => state.employees.allEmployees);
-
-  const [newTask, setNewTask] = useState<INewTask>({
-    name: "",
-    description: "",
-    startDate: "",
-    endDate: "",
-    employeeId: "",
-  });
+  const taskToUpdate = useAppSelector((state) =>
+    state.tasks.items.find((task) => task.id === taskId)
+  );
+  const [updatedTask, setUpdatedTask] = useState<ITask>(taskToUpdate as ITask);
 
   useEffect(() => {
     if (!employees.length) {
@@ -35,7 +33,7 @@ const CreateTaskForm = ({
       | ChangeEvent<HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setNewTask((prev) => ({
+    setUpdatedTask((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -43,8 +41,8 @@ const CreateTaskForm = ({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    dispatch(createTask(newTask)).then(() => {
-      handleOpenCreateTask();
+    dispatch(updateTask({ task: updatedTask })).then(() => {
+      handleOpenUpdateTask();
     });
   };
 
@@ -78,10 +76,10 @@ const CreateTaskForm = ({
   return (
     <div>
       {loading && <div className="loading">Loading...</div>}
-      <div className="popup__background" onClick={handleOpenCreateTask}></div>
+      <div className="popup__background" onClick={handleOpenUpdateTask}></div>
       <div className="popup__window">
         <h4>Create task</h4>
-        <button onClick={handleOpenCreateTask}>X</button>
+        <button onClick={handleOpenUpdateTask}>X</button>
         <form onSubmit={handleSubmit}>
           {formInputs.map((inputInfo) => {
             return (
@@ -108,7 +106,7 @@ const CreateTaskForm = ({
                   <textarea
                     name={inputInfo.id}
                     id={inputInfo.id}
-                    value={newTask.description}
+                    value={updatedTask.description}
                     onChange={handleInputChange}
                   ></textarea>
                 ) : (
@@ -116,7 +114,7 @@ const CreateTaskForm = ({
                     type={inputInfo.type}
                     id={inputInfo.id}
                     name={inputInfo.id}
-                    value={newTask[inputInfo.id as keyof typeof newTask]}
+                    value={updatedTask[inputInfo.id as keyof ITask]}
                     required
                     onChange={handleInputChange}
                   />
@@ -133,4 +131,4 @@ const CreateTaskForm = ({
   );
 };
 
-export default CreateTaskForm;
+export default UpdateTaskForm;
