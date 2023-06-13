@@ -10,19 +10,17 @@ const Tasks: FC = () => {
   const tasks = useAppSelector((state) => state.tasks.items);
   const loading = useAppSelector((state) => state.tasks.loading);
   const error = useAppSelector((state) => state.tasks.error);
-  const [createTaskOpen, setCreateTaskOpen] = useState(false)
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllTasks());
   }, [dispatch]);
 
-
   const handleOpenCreateTask = () => {
-    setCreateTaskOpen(!createTaskOpen)
-  }
+    setCreateTaskOpen(!createTaskOpen);
+  };
 
-  console.log(createTaskOpen, 'form open');
-  
+  console.log(createTaskOpen, "form open");
 
   return (
     <div className="tasks__page">
@@ -30,7 +28,9 @@ const Tasks: FC = () => {
       <h2>Tasks</h2>
       <div>
         <button onClick={handleOpenCreateTask}>Create new task</button>
-        {createTaskOpen && <CreateTaskForm handleOpenCreateTask={handleOpenCreateTask}/>}
+        {createTaskOpen && (
+          <CreateTaskForm handleOpenCreateTask={handleOpenCreateTask} />
+        )}
       </div>
       <div className="tasks__container">
         {tasks.map((task) => (

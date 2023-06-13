@@ -1,15 +1,17 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { createTask } from "./slice";
 import { INewTask } from "../../types";
+import { fetchAllEmployees } from "../employees/slice";
 
 const CreateTaskForm = ({
-    handleOpenCreateTask,
+  handleOpenCreateTask,
 }: {
-    handleOpenCreateTask: () => void;
+  handleOpenCreateTask: () => void;
 }) => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.tasks.loading);
+  const employees = useAppSelector((state) => state.employees.allEmployees);
 
   const [newTask, setNewTask] = useState<INewTask>({
     name: "",
@@ -19,9 +21,18 @@ const CreateTaskForm = ({
     employeeId: "",
   });
 
+  useEffect(() => {
+    if (!employees.length) {
+      dispatch(fetchAllEmployees());
+    }
+  }, [dispatch, employees.length]);
 
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e:
+      | ChangeEvent<HTMLInputElement>
+      | ChangeEvent<HTMLSelectElement>
+      | ChangeEvent<HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setNewTask((prev) => ({
       ...prev,
@@ -32,7 +43,7 @@ const CreateTaskForm = ({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(createTask(newTask)).then(() => {
-        handleOpenCreateTask()
+      handleOpenCreateTask();
     });
   };
 
@@ -48,14 +59,14 @@ const CreateTaskForm = ({
       label: "Description:",
     },
     {
-      type: "text",
+      type: "date",
       id: "startDate",
-      label: "Start date:",
+      label: "Start Date:",
     },
     {
-      type: "text",
+      type: "date",
       id: "endDate",
-      label: "End date:",
+      label: "End Date:",
     },
     {
       type: "text",
@@ -73,16 +84,42 @@ const CreateTaskForm = ({
         <form onSubmit={handleSubmit}>
           {formInputs.map((inputInfo) => {
             return (
-              <div key={inputInfo.id} className="input__info">
+              <div key={inputInfo.id} className="input__container">
                 <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
-                <input
-                  type={inputInfo.type}
-                  id={inputInfo.id}
-                  name={inputInfo.id}
-                  value={newTask[inputInfo.id as keyof typeof newTask]}
-                  required
-                  onChange={handleInputChange}
-                />
+                {inputInfo.id === "employeeId" ? (
+                  <select
+                    name={inputInfo.id}
+                    id={inputInfo.id}
+                    required
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map((employee) => {
+                      const fullName = `${employee.name} ${employee.surname}`;
+                      return (
+                        <option key={employee.id} value={employee.id}>
+                          {fullName}
+                        </option>
+                      );
+                    })}
+                  </select>
+                ) : inputInfo.id === "description" ? (
+                  <textarea
+                    name={inputInfo.id}
+                    id={inputInfo.id}
+                    value={newTask.description}
+                    onChange={handleInputChange}
+                  ></textarea>
+                ) : (
+                  <input
+                    type={inputInfo.type}
+                    id={inputInfo.id}
+                    name={inputInfo.id}
+                    value={newTask[inputInfo.id as keyof typeof newTask]}
+                    required
+                    onChange={handleInputChange}
+                  />
+                )}
               </div>
             );
           })}
