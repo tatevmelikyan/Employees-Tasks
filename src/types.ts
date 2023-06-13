@@ -21,3 +21,11 @@ export interface ITask {
   endDate: string;
   employeeId: string;
 }
+
+export interface INewTask {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  employeeId: string;
+}

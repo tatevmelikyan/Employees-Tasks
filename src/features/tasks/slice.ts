@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { ITask } from "../../types";
+import { INewTask, ITask } from "../../types";
 
 interface ITasksState {
   items: ITask[];
@@ -24,6 +24,27 @@ const fetchAllTasks = createAsyncThunk("tasks/fetchAllTasks", async () => {
   return data;
 });
 
+
+const createTask = createAsyncThunk(
+  'tasks/createTask',
+  async (task: INewTask) => {
+    const response = await fetch('https://rocky-temple-83495.herokuapp.com/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(task),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create task.');
+    }
+
+    const createdTask = await response.json();
+    return createdTask;
+  }
+);
+
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
@@ -45,9 +66,22 @@ const tasksSlice = createSlice({
       state.loading = false
       state.error = error.message as string
     })
+    .addCase(createTask.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+.    addCase(createTask.fulfilled, (state, {payload}) => {
+      state.loading = false;
+      state.error = null;
+      state.items.push(payload);
+    })
+    .addCase(createTask.rejected, (state, {error}) => {
+      state.loading = false;
+      state.error = error.message as string;
+    });
   },
 });
 
-export {fetchAllTasks}
+export {fetchAllTasks, createTask}
 
 export default tasksSlice.reducer;
