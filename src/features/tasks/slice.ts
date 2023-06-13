@@ -49,7 +49,7 @@ const createTask = createAsyncThunk(
 
 const updateTask = createAsyncThunk<ITask, { task: ITask }>(
   "tasks/updateTask",
-  async ( {task} ) => {
+  async ({ task }) => {
     const response = await fetch(
       `https://rocky-temple-83495.herokuapp.com/tasks/${task.id}`,
       {
@@ -69,6 +69,23 @@ const updateTask = createAsyncThunk<ITask, { task: ITask }>(
   }
 );
 
+const deleteTask = createAsyncThunk<string, string, { rejectValue: string }>(
+  "tasks/deleteTask",
+  async (taskId, { rejectWithValue }) => {
+    try {
+      const response = await fetch(
+        `https://rocky-temple-83495.herokuapp.com/tasks/${taskId}`,
+        {
+          method: "DELETE",
+        }
+      );
+      return taskId;
+    } catch (error) {
+      return rejectWithValue("Failed to delete task");
+    }
+  }
+);
+
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
@@ -80,8 +97,6 @@ const tasksSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAllTasks.fulfilled, (state, { payload }) => {
-        console.log(payload, "payload of tasks");
-
         state.loading = false;
         state.error = null;
         state.items = payload;
@@ -107,21 +122,36 @@ const tasksSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateTask.fulfilled, (state, {payload: updatedTask}) => {
+      .addCase(updateTask.fulfilled, (state, { payload: updatedTask }) => {
         state.loading = false;
         state.error = null;
-        const index = state.items.findIndex((task) => task.id === updatedTask.id);
+        const index = state.items.findIndex(
+          (task) => task.id === updatedTask.id
+        );
         if (index !== -1) {
           state.items[index] = updatedTask;
         }
       })
-      .addCase(updateTask.rejected, (state, {error}) => {
+      .addCase(updateTask.rejected, (state, { error }) => {
         state.loading = false;
         state.error = error.message as string;
+      })
+      .addCase(deleteTask.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteTask.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        state.items = state.items.filter((task) => task.id !== payload);
+      })
+      .addCase(deleteTask.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload || "An error occurred.";
       });
   },
 });
 
-export { fetchAllTasks, createTask, updateTask };
+export { fetchAllTasks, createTask, updateTask, deleteTask };
 
 export default tasksSlice.reducer;

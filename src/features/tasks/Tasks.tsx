@@ -5,6 +5,7 @@ import {} from "../employees/slice";
 import { fetchAllTasks } from "./slice";
 import CreateTaskForm from "./CreateTaskForm";
 import UpdateTaskForm from "./UpdateTaskForm";
+import DeleteTask from "./DeleteTask";
 
 const Tasks: FC = () => {
   const dispatch = useAppDispatch();
@@ -14,7 +15,8 @@ const Tasks: FC = () => {
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [updatedTaskOpen, setUpdateTaskOpen] = useState(false);
   const [taskToUpdate, setTaskToUpdate] = useState("");
-
+  const [taskToDelete, setTaskToDelete] = useState("");
+  const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchAllTasks());
@@ -28,7 +30,9 @@ const Tasks: FC = () => {
     setUpdateTaskOpen(!updatedTaskOpen);
   };
 
-
+  const handleOpenDeleteTask = () => {
+    setDeleteTaskOpen(!deleteTaskOpen);
+  };
   return (
     <div className="tasks__page">
       {loading && <div className="loading">Loading...</div>}
@@ -45,6 +49,12 @@ const Tasks: FC = () => {
           taskId={taskToUpdate}
         />
       )}
+      {deleteTaskOpen && (
+        <DeleteTask
+          handleOpenDeleteTask={handleOpenDeleteTask}
+          taskId={taskToDelete}
+        />
+      )}
       <div className="tasks__container">
         {tasks.map((task) => (
           <div>
@@ -56,6 +66,14 @@ const Tasks: FC = () => {
               }}
             >
               Edit
+            </button>
+            <button
+              onClick={() => {
+                setTaskToDelete(task.id);
+                handleOpenDeleteTask();
+              }}
+            >
+              Delete Task
             </button>
           </div>
         ))}
