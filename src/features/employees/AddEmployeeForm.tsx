@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { INewEmployee } from "../../types";
-import { useAppDispatch } from "../../app/hooks";
-import { fetchAllEmployees } from "./slice";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { addEmployee, fetchAllEmployees } from "./slice";
 
 const AddEmployeeForm = ({
   setOpen,
@@ -9,7 +9,7 @@ const AddEmployeeForm = ({
   setOpen: (isOpen: boolean) => void;
 }) => {
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
+  const loading = useAppSelector((state) => state.employees.loading);
   const [newEmployee, setNewEmployee] = useState<INewEmployee>({
     name: "",
     surname: "",
@@ -17,10 +17,12 @@ const AddEmployeeForm = ({
     position: "",
   });
 
+  const handleCancel = () => {
+    setOpen(false);
+  };
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(name, "name of el");
-
     setNewEmployee((prev) => ({
       ...prev,
       [name]: value,
@@ -29,93 +31,60 @@ const AddEmployeeForm = ({
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
-    fetch("https://rocky-temple-83495.herokuapp.com/employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newEmployee),
-    })
-      .then((res) => {
-        setLoading(false);
-        setNewEmployee({
-          name: "",
-          surname: "",
-          email: "",
-          position: "",
-        });
-        setOpen(false);
-        dispatch(fetchAllEmployees());
-      })
-      .catch((err) => console.error(err));
+    dispatch(addEmployee(newEmployee)).then(() => {
+      handleCancel();
+    });
   };
 
+  const formInputs = [
+    {
+      type: "text",
+      id: "name",
+      label: "Name:",
+    },
+    {
+      type: "text",
+      id: "surname",
+      label: "Surname:",
+    },
+    {
+      type: "email",
+      id: "email",
+      label: "Email:",
+    },
+    {
+      type: "text",
+      id: "position",
+      label: "Position:",
+    },
+  ];
+
   return (
-    <>
-      <div className="popup__background" onClick={() => setOpen(false)}></div>
+    <div>
+      {loading && <div className="loading">Loading...</div>}
+      <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            setOpen(false);
-          }}
-        >
-          X
-        </button>
+        <button onClick={handleCancel}>X</button>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name">Name:</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={newEmployee.name}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="surname">Surname:</label>
-            <input
-              type="text"
-              id="surname"
-              name="surname"
-              value={newEmployee.surname}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={newEmployee.email}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="position">Position</label>
-            <input
-              type="text"
-              id="position"
-              name="position"
-              value={newEmployee.position}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          {loading ? (
-            <button disabled>Loading...</button>
-          ) : (
-            <button>Save</button>
-          )}
+          {formInputs.map((inputInfo) => {
+            return (
+              <div>
+                <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                <input
+                  type={inputInfo.type}
+                  id={inputInfo.id}
+                  name={inputInfo.id}
+                  value={newEmployee[inputInfo.id as keyof INewEmployee]}
+                  required
+                  onChange={handleInputChange}
+                />
+              </div>
+            );
+          })}
+          <button>Save</button>
         </form>
       </div>
-    </>
+    </div>
   );
 };
 

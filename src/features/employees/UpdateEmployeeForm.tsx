@@ -15,7 +15,6 @@ const UpdateEmployeeForm = ({
   const employee = useAppSelector((state) =>
     state.employees.pageEmployees.find((employee) => employee.id === employeeId)
   );
-  console.log(employee, "employee to update");
 
   const [updatedEmployee, setUpdatedEmployee] = useState<IEmployee>(
     employee as IEmployee
@@ -40,6 +39,29 @@ const UpdateEmployeeForm = ({
     });
   };
 
+  const formInputs = [
+    {
+      type: "text",
+      id: "name",
+      label: "Name:",
+    },
+    {
+      type: "text",
+      id: "surname",
+      label: "Surname:",
+    },
+    {
+      type: "email",
+      id: "email",
+      label: "Email:",
+    },
+    {
+      type: "text",
+      id: "position",
+      label: "Position:",
+    },
+  ];
+
   return (
     <div>
       {loading && <div className="loading">Loading...</div>}
@@ -47,50 +69,21 @@ const UpdateEmployeeForm = ({
       <div className="popup__window">
         <button onClick={handleCancel}>X</button>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name">Name:</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={updatedEmployee.name}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="surname">Surname:</label>
-            <input
-              type="text"
-              id="surname"
-              name="surname"
-              value={updatedEmployee.surname}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={updatedEmployee.email}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
-          <div>
-            <label htmlFor="position">Position</label>
-            <input
-              type="text"
-              id="position"
-              name="position"
-              value={updatedEmployee.position}
-              required
-              onChange={handleInputChange}
-            />
-          </div>
+          {formInputs.map((inputInfo) => {
+            return (
+              <div>
+                <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                <input
+                  type={inputInfo.type}
+                  id={inputInfo.id}
+                  name={inputInfo.id}
+                  value={updatedEmployee[inputInfo.id as keyof IEmployee]}
+                  required
+                  onChange={handleInputChange}
+                />
+              </div>
+            );
+          })}
           <button>Save</button>
         </form>
       </div>

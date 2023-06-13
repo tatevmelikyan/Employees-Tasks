@@ -1,8 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
-import type { RootState } from "../../app/store";
-import { IEmployee } from "../../types";
-import { error } from "console";
+import { IEmployee, INewEmployee } from "../../types";
+
 
 interface EmployeesState {
   allEmployees: IEmployee[];
@@ -49,6 +47,29 @@ const fetchEmployeesPerPage = createAsyncThunk(
     return await response.json();
   }
 );
+
+
+const addEmployee = createAsyncThunk(
+  'employees/addEmployee',
+  async (employee: INewEmployee) => {
+    const response = await fetch('https://rocky-temple-83495.herokuapp.com/employees', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(employee),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to add employee.');
+    }
+
+    const addedEmployee = await response.json();
+    return addedEmployee;
+  }
+);
+
+
 
 const updateEmployee = createAsyncThunk(
   "employees/updateEmployee",
@@ -121,6 +142,19 @@ const employeesSlice = createSlice({
         state.loading = false;
         state.error = error.message as string;
       })
+      .addCase(addEmployee.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(addEmployee.fulfilled, (state, {payload}) => {
+        state.loading = false
+        state.error = null
+        state.allEmployees.push(payload)
+      })
+      .addCase(addEmployee.rejected, (state, {error}) => {
+        state.loading = false
+        state.error = error.message as string
+      })
       .addCase(updateEmployee.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -167,6 +201,7 @@ export const {} = employeesSlice.actions;
 export {
   fetchAllEmployees,
   fetchEmployeesPerPage,
+  addEmployee,
   updateEmployee,
   deleteEmployee,
 };
