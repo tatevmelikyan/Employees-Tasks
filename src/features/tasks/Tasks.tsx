@@ -6,6 +6,8 @@ import { fetchAllTasks } from "./slice";
 import CreateTaskForm from "./CreateTaskForm";
 import UpdateTaskForm from "./UpdateTaskForm";
 import DeleteTask from "./DeleteTask";
+import SearchTask from "./SearchTask";
+import ErrorMessage from "../error/ErrorMessage";
 
 const Tasks: FC = () => {
   const dispatch = useAppDispatch();
@@ -33,10 +35,14 @@ const Tasks: FC = () => {
   const handleOpenDeleteTask = () => {
     setDeleteTaskOpen(!deleteTaskOpen);
   };
+
+  console.log(tasks, "tasks");
+
   return (
     <div className="tasks__page">
       {loading && <div className="loading">Loading...</div>}
       <h2>Tasks</h2>
+      <SearchTask />
       <div>
         <button onClick={handleOpenCreateTask}>Create new task</button>
         {createTaskOpen && (
@@ -56,27 +62,31 @@ const Tasks: FC = () => {
         />
       )}
       <div className="tasks__container">
-        {tasks.map((task) => (
-          <div key={task.id}>
-            <Task key={task.id} task={task} />
-            <button
-              onClick={() => {
-                handleOpenUpdateTask();
-                setTaskToUpdate(task.id);
-              }}
-            >
-              Edit
-            </button>
-            <button
-              onClick={() => {
-                setTaskToDelete(task.id);
-                handleOpenDeleteTask();
-              }}
-            >
-              Delete Task
-            </button>
-          </div>
-        ))}
+        {error ? (
+          <ErrorMessage message={error} />
+        ) : (
+          tasks.map((task) => (
+            <div key={task.id}>
+              <Task key={task.id} task={task} />
+              <button
+                onClick={() => {
+                  handleOpenUpdateTask();
+                  setTaskToUpdate(task.id);
+                }}
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => {
+                  setTaskToDelete(task.id);
+                  handleOpenDeleteTask();
+                }}
+              >
+                Delete Task
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

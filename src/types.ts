@@ -29,3 +29,11 @@ export interface INewTask {
   endDate: string;
   employeeId: string;
 }
+
+
+export interface ISearchTaskParams {
+  name_like: string;
+  description_like: string;
+  startDate: string;
+  endDate: string;
+}

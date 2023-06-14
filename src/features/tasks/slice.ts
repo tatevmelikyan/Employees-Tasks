@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { INewTask, ITask } from "../../types";
+import { INewTask, ISearchTaskParams, ITask } from "../../types";
 
 interface ITasksState {
   items: ITask[];
@@ -86,6 +86,42 @@ const deleteTask = createAsyncThunk<string, string, { rejectValue: string }>(
   }
 );
 
+const searchTask = createAsyncThunk<
+  ITask[],
+  ISearchTaskParams,
+  { rejectValue: string }
+>(
+  "tasks/searchTask",
+  async (
+    { name_like, description_like, startDate, endDate },
+    { rejectWithValue }
+  ) => {
+    const queryParams = [
+      name_like.length && `name_like=${encodeURIComponent(name_like)}`,
+      description_like.length && `description_like=${encodeURIComponent(description_like)}`,
+      startDate.length && `startDate=${startDate}`,
+      endDate.length && `endDate=${endDate}`,
+    ]
+      .filter(Boolean)
+      .join("&");
+    let url = `https://rocky-temple-83495.herokuapp.com/tasks?${queryParams}`;
+    console.log(url, "url");
+    try {
+      const response = await fetch(url);
+      console.log(response, "response of search");
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error();
+      }
+    } catch (err) {
+      console.log("in err");
+
+      return rejectWithValue("Failed to fetch tasks");
+    }
+  }
+);
+
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
@@ -98,7 +134,6 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchAllTasks.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.error = null;
         state.items = payload;
       })
       .addCase(fetchAllTasks.rejected, (state, { error }) => {
@@ -111,7 +146,6 @@ const tasksSlice = createSlice({
       })
       .addCase(createTask.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.error = null;
         state.items.push(payload);
       })
       .addCase(createTask.rejected, (state, { error }) => {
@@ -124,7 +158,6 @@ const tasksSlice = createSlice({
       })
       .addCase(updateTask.fulfilled, (state, { payload: updatedTask }) => {
         state.loading = false;
-        state.error = null;
         const index = state.items.findIndex(
           (task) => task.id === updatedTask.id
         );
@@ -142,16 +175,27 @@ const tasksSlice = createSlice({
       })
       .addCase(deleteTask.fulfilled, (state, { payload }) => {
         state.loading = false;
-        state.error = null;
         state.items = state.items.filter((task) => task.id !== payload);
       })
       .addCase(deleteTask.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload || "An error occurred.";
+      })
+      .addCase(searchTask.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(searchTask.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.items = payload;
+      })
+      .addCase(searchTask.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload || "An error occurred";
       });
   },
 });
 
-export { fetchAllTasks, createTask, updateTask, deleteTask };
+export { fetchAllTasks, createTask, updateTask, deleteTask, searchTask };
 
 export default tasksSlice.reducer;
