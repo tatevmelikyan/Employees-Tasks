@@ -64,24 +64,27 @@ const AddEmployeeForm = ({
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <button onClick={handleCancel}>X</button>
+        <button className="x__button" onClick={handleCancel}>X</button>
+        <h4>Create Employee</h4>
         <form onSubmit={handleSubmit}>
-          {formInputs.map((inputInfo) => {
-            return (
-              <div>
-                <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
-                <input
-                  type={inputInfo.type}
-                  id={inputInfo.id}
-                  name={inputInfo.id}
-                  value={newEmployee[inputInfo.id as keyof INewEmployee]}
-                  required
-                  onChange={handleInputChange}
-                />
-              </div>
-            );
-          })}
-          <button>Save</button>
+          <div className="form__inputs">
+            {formInputs.map((inputInfo) => {
+              return (
+                <div>
+                  <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                  <input
+                    type={inputInfo.type}
+                    id={inputInfo.id}
+                    name={inputInfo.id}
+                    value={newEmployee[inputInfo.id as keyof INewEmployee]}
+                    required
+                    onChange={handleInputChange}
+                  />
+                </div>
+              );
+            })}
+          </div>
+          <button className="save__button">Save</button>
         </form>
       </div>
     </div>

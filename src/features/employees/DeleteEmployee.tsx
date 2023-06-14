@@ -12,7 +12,6 @@ const DeleteEmployee = ({
   const dispatch = useAppDispatch();
   const error = useAppSelector((state) => state.employees.error);
   const loading = useAppSelector((state) => state.employees.loading);
-  console.log(error, "error delete");
 
   const handleCancel = () => {
     setOpen(false);
@@ -26,17 +25,16 @@ const DeleteEmployee = ({
 
   return (
     <div>
+      {error}
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <div className="cancel__button" onClick={handleCancel}>
+        <button className="x__button" onClick={handleCancel}>
           X
-        </div>
-        <div className="title">
-          <span>Delete employee</span>
-        </div>
+        </button>
+          <h4>Delete employee</h4>
         <div className="content">
-          Deleting this employee will also delete it from the data base.
+          Are you sure you want to delete this employee?
         </div>
         <div className="buttons">
           <button className="cancel" onClick={handleCancel}>

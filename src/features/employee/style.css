@@ -1,0 +1,15 @@
+.employee__info {
+    padding: 10px 100px;
+    background-color: rgb(237, 217, 255);
+}
+
+
+.employee__info p {
+    padding: 10px;
+    background-color: rgb(197, 168, 226);
+    border-radius: 8px;
+}
+
+.employee__tasks__field {
+    padding: 0 100px;
+}

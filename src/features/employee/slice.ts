@@ -4,13 +4,15 @@ import { IEmployee, ITask } from "../../types";
 interface EmployeeState {
   info: IEmployee | null;
   tasks: ITask[];
-  loading: "idle" | "loading";
+  loading: boolean;
+  error: null | string
 }
 
 const initialState: EmployeeState = {
   info: null,
   tasks: [],
-  loading: "idle",
+  loading: false,
+  error: null
 };
 
 const fetchEmployee = createAsyncThunk(
@@ -38,28 +40,35 @@ export const employeeSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchEmployee.pending || fetchEmployeeTasks.pending, (state) => {
-        state.loading = "loading";
+      .addCase(fetchEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null
       })
       .addCase(fetchEmployee.fulfilled, (state, { payload }) => {
+        state.loading = false
         state.info = payload;
-        state.loading = "idle";
       })
       .addCase(
-        fetchEmployee.rejected || fetchEmployeeTasks.rejected,
-        (state, { payload }) => {
-          state.loading = "idle";
-          console.error(payload);
+        fetchEmployee.rejected,
+        (state, { error }) => {
+          state.loading = false;
+          state.error = error.message as string
         }
       )
+      .addCase(fetchEmployeeTasks.pending, (state) => {
+        state.loading = true
+      })
       .addCase(fetchEmployeeTasks.fulfilled, (state, { payload }) => {
         state.tasks = payload;
-        state.loading = "idle";
-      });
+        state.loading = false;
+      })
+      .addCase(fetchEmployeeTasks.rejected, (state, {error}) => {
+        state.loading = false
+        state.error = error.message as string
+      })
   },
 });
 
-export const {} = employeeSlice.actions;
 export { fetchEmployee, fetchEmployeeTasks };
 
 export default employeeSlice.reducer;

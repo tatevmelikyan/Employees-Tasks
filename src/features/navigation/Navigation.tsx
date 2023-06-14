@@ -1,5 +1,6 @@
 import React, { FC } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import './style.css'
 
 const Navigation: FC = () => {
   const pages = [
@@ -16,12 +17,13 @@ const Navigation: FC = () => {
       path: "/tasks",
     },
   ];
+  
   return (
     <nav className="nav">
       <ul>
       {pages.map((page) => (
-        <li key={page.path} className="page">
-          <Link to={page.path}>{page.name}</Link>
+        <li key={page.path}>
+          <NavLink to={page.path}>{page.name}</NavLink>
         </li>
       ))}
       </ul>

@@ -1,26 +1,36 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: sans-serif;
+}
+
+
 .popup__background {
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgb(192, 192, 192);
-    opacity: 0.8;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(221, 219, 219);
+  opacity: 0.8;
 }
 
 .loading {
   position: fixed;
-    z-index: 2;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgb(192, 192, 192);
-    opacity: 0.9;
-   display: flex;
-   justify-content: center;
-   align-items: center;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(241, 237, 245);
+  opacity: 0.9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .popup__window {
@@ -31,15 +41,122 @@
   top: 0;
   bottom: 0;
   margin: auto;
-  width: 300px;
-  height: 300px;
+  width: 50%;
+  height: fit-content;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  border: 1px solid black;
+  box-shadow: 1px 1px 10px rgb(134, 134, 134);
+  border-radius: 8px;
   background-color: white;
   padding: 20px 70px;
- margin: auto;
- gap: 10px;
+  margin: auto;
+  gap: 10px;
+}
+
+
+.page__content {
+  padding: 20px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.info__container {
+  padding: 0 30px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid blueviolet;
+  border-radius: 8px;
+  transition: 0.2s;
+  box-shadow: 1px 1px 10px rgb(134, 134, 134);
+}
+
+.info__container.employee:hover {
+  cursor: pointer;
+  box-shadow: 1px 1px 20px rgb(134, 134, 134);
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #e4e6eb;
+  border: none;
+  transition: .2s;
+}
+
+button:hover {
+  background-color: #d3d4d7;
+}
+
+button.add__item {
+  width: fit-content;
+}
+
+.title {
+  padding: 0 100px;
+}
+
+button.x__button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  border-radius: 50%;
+  border: none;
+}
+
+button.save__button,
+.delete {
+  background-color: blueviolet;
+  color: white;
+}
+
+button.save__button:hover,
+.delete:hover {
+  background-color: rgb(108, 36, 175);
+}
+
+form {
+  width: 80%;
+  padding: 10px;
+}
+
+.form__inputs {
+  padding: 10px 0;
+}
+
+.form__inputs div {
+  display: flex;
+  flex-direction: column;
+}
+
+.buttons .cancel {
+  color: blueviolet;
+}
+
+form.search {
+  display: flex;
+  gap: 10px;
+}
+
+form input {
+  padding: 10px;
+}
+
+.item__info {
+  width: 100%;
+}
+
+.item__info p {
+  border-radius: 8px;
 }

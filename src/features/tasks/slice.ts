@@ -110,18 +110,14 @@ const searchTask = createAsyncThunk<
       .filter(Boolean)
       .join("&");
     let url = `https://rocky-temple-83495.herokuapp.com/tasks?${queryParams}`;
-    console.log(url, "url");
     try {
       const response = await fetch(url);
-      console.log(response, "response of search");
       if (response.ok) {
         return response.json();
       } else {
         throw new Error();
       }
     } catch (err) {
-      console.log("in err");
-
       return rejectWithValue("Failed to fetch tasks");
     }
   }
@@ -131,7 +127,7 @@ const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    paginate: (state, { payload }) => {
+    paginateTasks: (state, { payload }) => {
       const { page, limit } = payload;
       state.paginatedItems = state.items.slice(
         (page - 1) * limit,
@@ -210,5 +206,5 @@ const tasksSlice = createSlice({
 });
 
 export { fetchAllTasks, createTask, updateTask, deleteTask, searchTask };
-export const { paginate } = tasksSlice.actions;
+export const { paginateTasks } = tasksSlice.actions;
 export default tasksSlice.reducer;

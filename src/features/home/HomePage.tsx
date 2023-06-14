@@ -1,8 +1,13 @@
-import React from 'react'
+import {FC} from 'react'
+import './style.css'
 
-const HomePage = () => {
+const HomePage: FC = () => {
   return (
-    <div>HomePage</div>
+    <div className='home__page'>
+     <h1>Welcome!</h1>
+     <p>You can get information about employees and tasks in the 'Employees' and 'Tasks' pages.</p>
+     <p>You can also create, update or delete any employee or task.</p>
+    </div>
   )
 }
 

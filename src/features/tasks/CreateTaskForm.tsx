@@ -80,57 +80,59 @@ const CreateTaskForm = ({
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleOpenCreateTask}></div>
       <div className="popup__window">
+      <button className="x__button" onClick={handleOpenCreateTask}>X</button>
         <h4>Create task</h4>
-        <button onClick={handleOpenCreateTask}>X</button>
         <form onSubmit={handleSubmit}>
-          {formInputs.map((inputInfo) => {
-            return (
-              <div key={inputInfo.id} className="input__container">
-                <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
-                {inputInfo.id === "employeeId" ? (
-                  <select
-                    name={inputInfo.id}
-                    id={inputInfo.id}
-                    required
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select Employee</option>
-                    {employees.map((employee) => {
-                      const fullName = `${employee.name} ${employee.surname}`;
-                      return (
-                        <option key={employee.id} value={employee.id}>
-                          {fullName}
-                        </option>
-                      );
-                    })}
-                  </select>
-                ) : inputInfo.id === "description" ? (
-                  <textarea
-                    name={inputInfo.id}
-                    id={inputInfo.id}
-                    value={newTask.description}
-                    onChange={handleInputChange}
-                  ></textarea>
-                ) : (
-                  <input
-                    type={inputInfo.type}
-                    id={inputInfo.id}
-                    name={inputInfo.id}
-                    value={newTask[inputInfo.id as keyof typeof newTask]}
-                    required
-                    onChange={handleInputChange}
-                    {...(inputInfo.id === "startDate"
-                      ? { max: newTask.endDate }
-                      : inputInfo.id === "endDate"
-                      ? { min: newTask.startDate }
-                      : {})}
-                  />
-                )}
-              </div>
-            );
-          })}
+         <div className="form__inputs">
+           {formInputs.map((inputInfo) => {
+             return (
+               <div key={inputInfo.id}>
+                 <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                 {inputInfo.id === "employeeId" ? (
+                   <select
+                     name={inputInfo.id}
+                     id={inputInfo.id}
+                     required
+                     onChange={handleInputChange}
+                   >
+                     <option value="">Select Employee</option>
+                     {employees.map((employee) => {
+                       const fullName = `${employee.name} ${employee.surname}`;
+                       return (
+                         <option key={employee.id} value={employee.id}>
+                           {fullName}
+                         </option>
+                       );
+                     })}
+                   </select>
+                 ) : inputInfo.id === "description" ? (
+                   <textarea
+                     name={inputInfo.id}
+                     id={inputInfo.id}
+                     value={newTask.description}
+                     onChange={handleInputChange}
+                   ></textarea>
+                 ) : (
+                   <input
+                     type={inputInfo.type}
+                     id={inputInfo.id}
+                     name={inputInfo.id}
+                     value={newTask[inputInfo.id as keyof typeof newTask]}
+                     required
+                     onChange={handleInputChange}
+                     {...(inputInfo.id === "startDate"
+                       ? { max: newTask.endDate }
+                       : inputInfo.id === "endDate"
+                       ? { min: newTask.startDate }
+                       : {})}
+                   />
+                 )}
+               </div>
+             );
+           })}
+         </div>
           <div className="buttons">
-            <button>Save</button>
+            <button className="save__button">Save</button>
           </div>
         </form>
       </div>

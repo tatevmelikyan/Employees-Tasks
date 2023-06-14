@@ -30,23 +30,6 @@ const fetchAllEmployees = createAsyncThunk(
   }
 );
 
-// const fetchEmployeesPerPage = createAsyncThunk(
-//   "employees/fetchEmployeesPerPage",
-//   async ({
-//     currentPage,
-//     dataPerPage,
-//   }: {
-//     currentPage: number;
-//     dataPerPage: number;
-//   }) => {
-//     const response = await fetch(
-//       `https://rocky-temple-83495.herokuapp.com/employees?_page=${currentPage}&_limit=${dataPerPage}`
-//     );
-//     console.log(response, "response");
-
-//     return await response.json();
-//   }
-// );
 
 
 const addEmployee = createAsyncThunk(
@@ -96,8 +79,6 @@ const updateEmployee = createAsyncThunk(
 const deleteEmployee = createAsyncThunk(
   "employees/deleteEmployee",
   async (employeeId: string) => {
-    console.log(employeeId, "id in delete");
-
     const response = await fetch(
       `https://rocky-temple-83495.herokuapp.com/employees/${employeeId}`,
       {

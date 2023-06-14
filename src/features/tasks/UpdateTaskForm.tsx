@@ -79,57 +79,59 @@ const UpdateTaskForm = ({
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleOpenUpdateTask}></div>
       <div className="popup__window">
-        <h4>Edit Task</h4>
-        <button onClick={handleOpenUpdateTask}>X</button>
+      <button className="x__button" onClick={handleOpenUpdateTask}>X</button>
+        <h4>Update Task</h4>
         <form onSubmit={handleSubmit}>
-          {formInputs.map((inputInfo) => {
-            return (
-              <div key={inputInfo.id} className="input__container">
-                <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
-                {inputInfo.id === "employeeId" ? (
-                  <select
-                    name={inputInfo.id}
-                    id={inputInfo.id}
-                    required
-                    onChange={handleInputChange}
-                    value={taskToUpdate?.employeeId}
-                  >
-                    {employees.map((employee) => {
-                      const fullName = `${employee.name} ${employee.surname}`;
-                      return (
-                        <option key={employee.id} value={employee.id}>
-                          {fullName}
-                        </option>
-                      );
-                    })}
-                  </select>
-                ) : inputInfo.id === "description" ? (
-                  <textarea
-                    name={inputInfo.id}
-                    id={inputInfo.id}
-                    value={updatedTask.description}
-                    onChange={handleInputChange}
-                  ></textarea>
-                ) : (
-                  <input
-                    type={inputInfo.type}
-                    id={inputInfo.id}
-                    name={inputInfo.id}
-                    value={updatedTask[inputInfo.id as keyof ITask]}
-                    required
-                    onChange={handleInputChange}
-                    {...(inputInfo.id === "startDate"
-                      ? { max: updatedTask.endDate }
-                      : inputInfo.id === "endDate"
-                      ? { min: updatedTask.startDate }
-                      : {})}
-                  />
-                )}
-              </div>
-            );
-          })}
+         <div className="form__inputs">
+           {formInputs.map((inputInfo) => {
+             return (
+               <div key={inputInfo.id}>
+                 <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                 {inputInfo.id === "employeeId" ? (
+                   <select
+                     name={inputInfo.id}
+                     id={inputInfo.id}
+                     required
+                     onChange={handleInputChange}
+                     value={taskToUpdate?.employeeId}
+                   >
+                     {employees.map((employee) => {
+                       const fullName = `${employee.name} ${employee.surname}`;
+                       return (
+                         <option key={employee.id} value={employee.id}>
+                           {fullName}
+                         </option>
+                       );
+                     })}
+                   </select>
+                 ) : inputInfo.id === "description" ? (
+                   <textarea
+                     name={inputInfo.id}
+                     id={inputInfo.id}
+                     value={updatedTask.description}
+                     onChange={handleInputChange}
+                   ></textarea>
+                 ) : (
+                   <input
+                     type={inputInfo.type}
+                     id={inputInfo.id}
+                     name={inputInfo.id}
+                     value={updatedTask[inputInfo.id as keyof ITask]}
+                     required
+                     onChange={handleInputChange}
+                     {...(inputInfo.id === "startDate"
+                       ? { max: updatedTask.endDate }
+                       : inputInfo.id === "endDate"
+                       ? { min: updatedTask.startDate }
+                       : {})}
+                   />
+                 )}
+               </div>
+             );
+           })}
+         </div>
           <div className="buttons">
-            <button>Save</button>
+            <button className="save__button">Save</button>
           </div>
         </form>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { ISearchTaskParams } from "../../types";
 import { useAppDispatch } from "../../app/hooks";
-import { searchTask } from "./slice";
+import { paginateTasks, searchTask } from "./slice";
 
 const SearchTask = () => {
   const dispatch = useAppDispatch();
@@ -22,7 +22,9 @@ const SearchTask = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    dispatch(searchTask(searchParams));
+    dispatch(searchTask(searchParams)).then(() => {
+      dispatch(paginateTasks({page: 1, limit: 3}))
+    });
   };
 
   const searchFields = [
@@ -49,18 +51,20 @@ const SearchTask = () => {
   ];
 
   return (
-    <div className="search__form">
+    <div className="title">
       <h2>Search Task</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="search" onSubmit={handleSubmit}>
         {searchFields.map((field) => (
-          <input
-            key={field.name}
+          <label key={field.name} htmlFor={field.name}>
+            {field.placeholder}
+            <input
             type={field.type}
-            placeholder={field.placeholder}
             name={field.name}
+            id={field.name}
             value={searchParams[field.name as keyof ISearchTaskParams]}
             onChange={handleInputChange}
           />
+          </label>
         ))}
         <button>Search</button>
       </form>

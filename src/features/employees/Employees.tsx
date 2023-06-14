@@ -7,6 +7,7 @@ import UpdateEmployeeForm from "./UpdateEmployeeForm";
 import DeleteEmployee from "./DeleteEmployee";
 import Pagination from "../pagination/Pagination";
 
+
 const Employees: FC = () => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.employees.loading);
@@ -36,13 +37,14 @@ const Employees: FC = () => {
   };
 
   return (
-    <div>
-      <h2>Employees</h2>
+    <div className="employees__page">
+      <div className="title">
+        <h2>Employees</h2>
+        <button className="add__item" onClick={() => setAddFormOpen(true)}>Create Employee</button>
+      </div>
       {loading && <div className="loading">Loading...</div>}
-      {addFormOpen ? (
+      {addFormOpen && (
         <AddEmployeeForm setOpen={setAddFormOpen} />
-      ) : (
-        <button onClick={() => setAddFormOpen(true)}>Add a new employee</button>
       )}
       {updateFormOpen && (
         <UpdateEmployeeForm
@@ -56,45 +58,49 @@ const Employees: FC = () => {
           employeeId={employeeToDelete}
         />
       )}
-      {paginatedEmployees.map((employee) => {
-        return (
-          <div
-            key={employee.id}
-            className="employee__container"
-            onClick={() => navigate(`/employees/${employee.id}`)}
-          >
-            <div className="employee__info">
-              <p>ID: {employee.id}</p>
-              <p>Name: {employee.name}</p>
-              <p>Surname: {employee.surname}</p>
-              <p>Email: {employee.email}</p>
-              <p>Position: {employee.position}</p>
+      <div className="page__content">
+        {paginatedEmployees.map((employee) => {
+          return (
+            <div
+              key={employee.id}
+              className="info__container employee"
+              onClick={() => navigate(`/employees/${employee.id}`)}
+            >
+              <div className="item__info">
+                <p>ID: {employee.id}</p>
+                <p>Name: {employee.name}</p>
+                <p>Surname: {employee.surname}</p>
+                <p>Email: {employee.email}</p>
+                <p>Position: {employee.position}</p>
+              </div>
+              <div className="buttons">
+              <div className="update__employee">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setUpdateFormOpen(true);
+                    setEmployeeToUpdate(employee.id);
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+              <div className="delete__employee">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteEmployeePopup(true);
+                    setEmployeeToDelete(employee.id);
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+              </div>
             </div>
-            <div className="update__employee">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setUpdateFormOpen(true);
-                  setEmployeeToUpdate(employee.id);
-                }}
-              >
-                Update Employee
-              </button>
-            </div>
-            <div className="delete__employee">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteEmployeePopup(true);
-                  setEmployeeToDelete(employee.id);
-                }}
-              >
-                Delete Employee
-              </button>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
       <Pagination totalPages={totalPages} onPageChange={onPageChange} />
     </div>
   );
