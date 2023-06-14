@@ -119,6 +119,11 @@ const CreateTaskForm = ({
                     value={newTask[inputInfo.id as keyof typeof newTask]}
                     required
                     onChange={handleInputChange}
+                    {...(inputInfo.id === "startDate"
+                      ? { max: newTask.endDate }
+                      : inputInfo.id === "endDate"
+                      ? { min: newTask.startDate }
+                      : {})}
                   />
                 )}
               </div>

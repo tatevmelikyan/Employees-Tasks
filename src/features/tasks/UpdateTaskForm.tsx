@@ -73,12 +73,13 @@ const UpdateTaskForm = ({
       label: "Employee ID:",
     },
   ];
+
   return (
     <div>
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleOpenUpdateTask}></div>
       <div className="popup__window">
-        <h4>Create task</h4>
+        <h4>Edit Task</h4>
         <button onClick={handleOpenUpdateTask}>X</button>
         <form onSubmit={handleSubmit}>
           {formInputs.map((inputInfo) => {
@@ -91,8 +92,8 @@ const UpdateTaskForm = ({
                     id={inputInfo.id}
                     required
                     onChange={handleInputChange}
+                    value={taskToUpdate?.employeeId}
                   >
-                    <option value="">Select Employee</option>
                     {employees.map((employee) => {
                       const fullName = `${employee.name} ${employee.surname}`;
                       return (
@@ -117,6 +118,11 @@ const UpdateTaskForm = ({
                     value={updatedTask[inputInfo.id as keyof ITask]}
                     required
                     onChange={handleInputChange}
+                    {...(inputInfo.id === "startDate"
+                      ? { max: updatedTask.endDate }
+                      : inputInfo.id === "endDate"
+                      ? { min: updatedTask.startDate }
+                      : {})}
                   />
                 )}
               </div>

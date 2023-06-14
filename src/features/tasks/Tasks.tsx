@@ -57,7 +57,7 @@ const Tasks: FC = () => {
       )}
       <div className="tasks__container">
         {tasks.map((task) => (
-          <div>
+          <div key={task.id}>
             <Task key={task.id} task={task} />
             <button
               onClick={() => {
