@@ -1,62 +1,68 @@
-import React, { FC, useState, useEffect } from "react";
-import { IEmployee } from "../../types";
+import React, { FC, useState, useEffect, useRef } from "react";
 
-interface IPaginationProps {
-  totalData: IEmployee[];
-  dataPerPage: number;
-  currentPage: number;
-  setCurrentPage: (pageNumber: number) => void;
+interface PaginationProps {
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-const Pagination: FC<IPaginationProps> = ({
-  totalData,
-  dataPerPage,
-  setCurrentPage,
-  currentPage,
-}) => {
-  const [pagesCount, setPagesCount] = useState(0);
+const Pagination: FC<PaginationProps> = ({ totalPages, onPageChange }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const initialRender = useRef(true);
 
   useEffect(() => {
-    setPagesCount(Math.ceil(totalData.length / dataPerPage));
-  }, [totalData, dataPerPage]);
+    if (initialRender.current) {
+      initialRender.current = false;
+    } else {
+      onPageChange(currentPage);
+    }
+  }, [currentPage]);
 
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
   };
 
-  const handlePreviousPage = () => {
+  const handlePreviousPages = () => {
     if (currentPage !== 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage !== pagesCount) {
+  const handleNextPages = () => {
+    if (currentPage !== totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
-  const pageNumbers = [];
 
-  for (let i = 1; i <= pagesCount; i++) {
-    pageNumbers.push(i);
-  }
-  return (
-    <div className="pagination__container">
-      <ul className="pagination">
-        <li className="page_number" onClick={handlePreviousPage}>
-          Prev
+  const renderPageNumbers = () => {
+    const pages = [];
+    for (let page = 1; page <= totalPages; page++) {
+      pages.push(
+        <li key={page} className={currentPage === page ? "active" : ""}>
+          <button onClick={() => handlePageChange(page)}>{page}</button>
         </li>
-        {pageNumbers.map((number) => (
-          <li
-            key={number}
-            className="page__number"
-            onClick={() => handlePageChange(number)}
+      );
+    }
+    return pages;
+  };
+
+  return (
+    <div className="pagination">
+      <ul>
+        <li>
+          <button onClick={handlePreviousPages} disabled={currentPage === 1}>
+            Prev
+          </button>
+        </li>
+        {renderPageNumbers()}
+        <li>
+          <button
+            onClick={handleNextPages}
+            disabled={currentPage === totalPages}
           >
-            {number}
-          </li>
-        ))}
-        <li className="page_number" onClick={handleNextPage}>
-          Next
+            Next
+          </button>
         </li>
       </ul>
     </div>

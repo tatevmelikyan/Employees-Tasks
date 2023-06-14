@@ -12,7 +12,7 @@ const CreateTaskForm = ({
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.tasks.loading);
   const error = useAppSelector((state) => state.tasks.error);
-  const employees = useAppSelector((state) => state.employees.allEmployees);
+  const employees = useAppSelector((state) => state.employees.items);
 
   const [newTask, setNewTask] = useState<INewTask>({
     name: "",

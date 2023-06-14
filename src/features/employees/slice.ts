@@ -3,15 +3,15 @@ import { IEmployee, INewEmployee } from "../../types";
 
 
 interface EmployeesState {
-  allEmployees: IEmployee[];
-  pageEmployees: IEmployee[];
+  items: IEmployee[];
+  paginatedItems: IEmployee[];
   loading: boolean;
   error: string | null;
 }
 
 const initialState: EmployeesState = {
-  allEmployees: [],
-  pageEmployees: [],
+  items: [],
+  paginatedItems: [],
   loading: false,
   error: null,
 };
@@ -30,23 +30,23 @@ const fetchAllEmployees = createAsyncThunk(
   }
 );
 
-const fetchEmployeesPerPage = createAsyncThunk(
-  "employees/fetchEmployeesPerPage",
-  async ({
-    currentPage,
-    dataPerPage,
-  }: {
-    currentPage: number;
-    dataPerPage: number;
-  }) => {
-    const response = await fetch(
-      `https://rocky-temple-83495.herokuapp.com/employees?_page=${currentPage}&_limit=${dataPerPage}`
-    );
-    console.log(response, "response");
+// const fetchEmployeesPerPage = createAsyncThunk(
+//   "employees/fetchEmployeesPerPage",
+//   async ({
+//     currentPage,
+//     dataPerPage,
+//   }: {
+//     currentPage: number;
+//     dataPerPage: number;
+//   }) => {
+//     const response = await fetch(
+//       `https://rocky-temple-83495.herokuapp.com/employees?_page=${currentPage}&_limit=${dataPerPage}`
+//     );
+//     console.log(response, "response");
 
-    return await response.json();
-  }
-);
+//     return await response.json();
+//   }
+// );
 
 
 const addEmployee = createAsyncThunk(
@@ -113,7 +113,15 @@ const deleteEmployee = createAsyncThunk(
 const employeesSlice = createSlice({
   name: "employees",
   initialState,
-  reducers: {},
+  reducers: {
+    paginateEmployees: (state, { payload }) => {
+      const { page, limit } = payload;
+      state.paginatedItems = state.items.slice(
+        (page - 1) * limit,
+        page * limit
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllEmployees.pending, (state) => {
@@ -123,25 +131,25 @@ const employeesSlice = createSlice({
       .addCase(fetchAllEmployees.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.error = null;
-        state.allEmployees = payload;
+        state.items = payload;
       })
       .addCase(fetchAllEmployees.rejected, (state, { error }) => {
         state.loading = false;
         state.error = error.message as string;
       })
-      .addCase(fetchEmployeesPerPage.pending, (state) => {
-        state.loading = false;
-        state.error = null;
-      })
-      .addCase(fetchEmployeesPerPage.fulfilled, (state, { payload }) => {
-        state.loading = false;
-        state.error = null;
-        state.pageEmployees = payload;
-      })
-      .addCase(fetchEmployeesPerPage.rejected, (state, { error }) => {
-        state.loading = false;
-        state.error = error.message as string;
-      })
+      // .addCase(fetchEmployeesPerPage.pending, (state) => {
+      //   state.loading = false;
+      //   state.error = null;
+      // })
+      // .addCase(fetchEmployeesPerPage.fulfilled, (state, { payload }) => {
+      //   state.loading = false;
+      //   state.error = null;
+      //   state.pageEmployees = payload;
+      // })
+      // .addCase(fetchEmployeesPerPage.rejected, (state, { error }) => {
+      //   state.loading = false;
+      //   state.error = error.message as string;
+      // })
       .addCase(addEmployee.pending, (state) => {
         state.loading = true
         state.error = null
@@ -149,7 +157,7 @@ const employeesSlice = createSlice({
       .addCase(addEmployee.fulfilled, (state, {payload}) => {
         state.loading = false
         state.error = null
-        state.allEmployees.push(payload)
+        state.items.push(payload)
       })
       .addCase(addEmployee.rejected, (state, {error}) => {
         state.loading = false
@@ -164,11 +172,11 @@ const employeesSlice = createSlice({
         (state, { payload: updatedEmployee }) => {
           state.loading = false;
           state.error = null;
-          const index = state.allEmployees.findIndex(
+          const index = state.items.findIndex(
             (employee) => employee.id === updatedEmployee.id
           );
           if (index !== -1) {
-            state.allEmployees[index] = updatedEmployee;
+            state.items[index] = updatedEmployee;
           }
         }
       )
@@ -183,10 +191,7 @@ const employeesSlice = createSlice({
       .addCase(deleteEmployee.fulfilled, (state, { meta }) => {
         state.loading = false;
         state.error = null;
-        state.allEmployees = state.allEmployees.filter(
-          (employee) => employee.id !== meta.arg
-        );
-        state.pageEmployees = state.pageEmployees.filter(
+        state.items = state.items.filter(
           (employee) => employee.id !== meta.arg
         );
       })
@@ -197,10 +202,10 @@ const employeesSlice = createSlice({
   },
 });
 
-export const {} = employeesSlice.actions;
+export const {paginateEmployees} = employeesSlice.actions;
 export {
   fetchAllEmployees,
-  fetchEmployeesPerPage,
+  // fetchEmployeesPerPage,
   addEmployee,
   updateEmployee,
   deleteEmployee,

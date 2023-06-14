@@ -1,14 +1,17 @@
+import { IPagination } from "./../../types";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { INewTask, ISearchTaskParams, ITask } from "../../types";
 
 interface ITasksState {
   items: ITask[];
+  paginatedItems: ITask[];
   loading: boolean;
   error: null | string;
 }
 
 const initialState: ITasksState = {
   items: [],
+  paginatedItems: [],
   loading: false,
   error: null,
 };
@@ -20,7 +23,8 @@ const fetchAllTasks = createAsyncThunk("tasks/fetchAllTasks", async () => {
   if (!response.ok) {
     throw new Error("Failed fetching tasks");
   }
-  const data = response.json();
+  const data = await response.json();
+
   return data;
 });
 
@@ -98,7 +102,8 @@ const searchTask = createAsyncThunk<
   ) => {
     const queryParams = [
       name_like.length && `name_like=${encodeURIComponent(name_like)}`,
-      description_like.length && `description_like=${encodeURIComponent(description_like)}`,
+      description_like.length &&
+        `description_like=${encodeURIComponent(description_like)}`,
       startDate.length && `startDate=${startDate}`,
       endDate.length && `endDate=${endDate}`,
     ]
@@ -125,7 +130,15 @@ const searchTask = createAsyncThunk<
 const tasksSlice = createSlice({
   name: "tasks",
   initialState,
-  reducers: {},
+  reducers: {
+    paginate: (state, { payload }) => {
+      const { page, limit } = payload;
+      state.paginatedItems = state.items.slice(
+        (page - 1) * limit,
+        page * limit
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllTasks.pending, (state) => {
@@ -197,5 +210,5 @@ const tasksSlice = createSlice({
 });
 
 export { fetchAllTasks, createTask, updateTask, deleteTask, searchTask };
-
+export const { paginate } = tasksSlice.actions;
 export default tasksSlice.reducer;

@@ -1,39 +1,44 @@
 import React, { FC, useEffect, useState, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { fetchAllEmployees, fetchEmployeesPerPage } from "./slice";
-import Pagination from "../pagination/Pagination";
+import { fetchAllEmployees, paginateEmployees } from "./slice";
 import AddEmployeeForm from "./AddEmployeeForm";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import UpdateEmployeeForm from "./UpdateEmployeeForm";
 import DeleteEmployee from "./DeleteEmployee";
+import Pagination from "../pagination/Pagination";
 
 const Employees: FC = () => {
   const dispatch = useAppDispatch();
-  const status = useAppSelector((state) => state.employees.loading);
-  const pageEmployees = useAppSelector(
-    (state) => state.employees.pageEmployees
+  const loading = useAppSelector((state) => state.employees.loading);
+
+  const allEmployees = useAppSelector((state) => state.employees.items);
+  const paginatedEmployees = useAppSelector(
+    (state) => state.employees.paginatedItems
   );
-  const allEmployees = useAppSelector((state) => state.employees.allEmployees);
-  const [dataPerPage, setDataPerPage] = useState(2);
-  const [currentPage, setCurrentPage] = useState(1);
+
   const [addFormOpen, setAddFormOpen] = useState(false);
   const [updateFormOpen, setUpdateFormOpen] = useState(false);
   const [employeeToUpdate, setEmployeeToUpdate] = useState("");
   const [employeeToDelete, setEmployeeToDelete] = useState("");
   const [deleteEmployeePopup, setDeleteEmployeePopup] = useState(false);
+  const limit = 3;
+  const totalPages = Math.ceil(allEmployees.length / limit);
 
   const navigate = useNavigate();
   useEffect(() => {
-    dispatch(fetchAllEmployees());
+    dispatch(fetchAllEmployees()).then(() => {
+      dispatch(paginateEmployees({ page: 1, limit }));
+    });
   }, [dispatch]);
 
-  useEffect(() => {
-    dispatch(fetchEmployeesPerPage({ currentPage: currentPage, dataPerPage }));
-  }, [dispatch, currentPage, dataPerPage, allEmployees]);
+  const onPageChange = (page: number) => {
+    dispatch(paginateEmployees({ page, limit }));
+  };
 
   return (
     <div>
       <h2>Employees</h2>
+      {loading && <div className="loading">Loading...</div>}
       {addFormOpen ? (
         <AddEmployeeForm setOpen={setAddFormOpen} />
       ) : (
@@ -51,7 +56,7 @@ const Employees: FC = () => {
           employeeId={employeeToDelete}
         />
       )}
-      {pageEmployees.map((employee) => {
+      {paginatedEmployees.map((employee) => {
         return (
           <div
             key={employee.id}
@@ -90,12 +95,7 @@ const Employees: FC = () => {
           </div>
         );
       })}
-      <Pagination
-        totalData={allEmployees}
-        dataPerPage={dataPerPage}
-        setCurrentPage={setCurrentPage}
-        currentPage={currentPage}
-      />
+      <Pagination totalPages={totalPages} onPageChange={onPageChange} />
     </div>
   );
 };

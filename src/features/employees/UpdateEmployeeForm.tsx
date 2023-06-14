@@ -13,7 +13,7 @@ const UpdateEmployeeForm = ({
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.employees.loading);
   const employee = useAppSelector((state) =>
-    state.employees.pageEmployees.find((employee) => employee.id === employeeId)
+    state.employees.paginatedItems.find((employee) => employee.id === employeeId)
   );
 
   const [updatedEmployee, setUpdatedEmployee] = useState<IEmployee>(

@@ -2,16 +2,18 @@ import React, { FC, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import Task from "./Task";
 import {} from "../employees/slice";
-import { fetchAllTasks } from "./slice";
+import { fetchAllTasks, paginate } from "./slice";
 import CreateTaskForm from "./CreateTaskForm";
 import UpdateTaskForm from "./UpdateTaskForm";
 import DeleteTask from "./DeleteTask";
 import SearchTask from "./SearchTask";
 import ErrorMessage from "../error/ErrorMessage";
+import Pagination from "../pagination/Pagination";
 
 const Tasks: FC = () => {
   const dispatch = useAppDispatch();
-  const tasks = useAppSelector((state) => state.tasks.items);
+  const allTasks = useAppSelector((state) => state.tasks.items);
+  const paginatedTasks = useAppSelector(state => state.tasks.paginatedItems)
   const loading = useAppSelector((state) => state.tasks.loading);
   const error = useAppSelector((state) => state.tasks.error);
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
@@ -19,9 +21,13 @@ const Tasks: FC = () => {
   const [taskToUpdate, setTaskToUpdate] = useState("");
   const [taskToDelete, setTaskToDelete] = useState("");
   const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
+  const limit = 3
+  const totalPages = Math.ceil(allTasks.length / limit);
 
   useEffect(() => {
-    dispatch(fetchAllTasks());
+    dispatch(fetchAllTasks()).then(() => {
+      dispatch(paginate({page: 1, limit}))
+    })
   }, [dispatch]);
 
   const handleOpenCreateTask = () => {
@@ -36,7 +42,12 @@ const Tasks: FC = () => {
     setDeleteTaskOpen(!deleteTaskOpen);
   };
 
-  console.log(tasks, "tasks");
+
+  const onPageChange = (page: number) => {
+    dispatch(paginate({page, limit}))
+  }
+
+  console.log(allTasks, "tasks");
 
   return (
     <div className="tasks__page">
@@ -65,7 +76,7 @@ const Tasks: FC = () => {
         {error ? (
           <ErrorMessage message={error} />
         ) : (
-          tasks.map((task) => (
+          paginatedTasks.map((task) => (
             <div key={task.id}>
               <Task key={task.id} task={task} />
               <button
@@ -88,6 +99,7 @@ const Tasks: FC = () => {
           ))
         )}
       </div>
+      <Pagination totalPages={totalPages} onPageChange={onPageChange}/>
     </div>
   );
 };
