@@ -4,3 +4,7 @@
     gap: 2px;
     justify-content: center;
 }
+
+.pagination .active {
+    background-color: rgb(159, 96, 217);
+}

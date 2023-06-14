@@ -40,8 +40,8 @@ const Pagination: FC<PaginationProps> = ({ totalPages, onPageChange }) => {
     const pages = [];
     for (let page = 1; page <= totalPages; page++) {
       pages.push(
-        <li key={page} className={currentPage === page ? "active" : ""}>
-          <button onClick={() => handlePageChange(page)}>{page}</button>
+        <li key={page}>
+          <button className={currentPage === page ? "active" : ""} onClick={() => handlePageChange(page)}>{page}</button>
         </li>
       );
     }

@@ -29,10 +29,8 @@ const Employee: FC = () => {
             <h2>{`${employee.name} ${employee.surname}`}</h2>
           </div>
           <div className="employee__info">
-            <p>ID: {employee.id}</p>
             <p>Name: {employee.name}</p>
             <p>Surname: {employee.surname}</p>
-            <p>Email: {employee.email}</p>
             <p>Position: {employee.position}</p>
           </div>
           <div className="employee__tasks__field">
