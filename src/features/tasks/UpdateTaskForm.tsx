@@ -1,19 +1,17 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { FC, useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { updateTask } from "./slice";
+import { paginateTasks, updateTask } from "./slice";
 import { ITask } from "../../types";
 import { fetchAllEmployees } from "../employees/slice";
 
-const UpdateTaskForm = ({
-  handleOpenUpdateTask,
-  taskId,
-}: {
+interface IUpdateTaskProps {
   handleOpenUpdateTask: () => void;
   taskId: string;
-}) => {
+}
+
+const UpdateTaskForm: FC<IUpdateTaskProps> = ({handleOpenUpdateTask,taskId}) => {
   const dispatch = useAppDispatch();
-  const loading = useAppSelector((state) => state.tasks.loading);
-  const error = useAppSelector((state) => state.tasks.error);
+  const currentPage = useAppSelector(state => state.tasks.currentPage)
   const employees = useAppSelector((state) => state.employees.items);
   const taskToUpdate = useAppSelector((state) =>
     state.tasks.items.find((task) => task.id === taskId)
@@ -42,6 +40,7 @@ const UpdateTaskForm = ({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(updateTask({ task: updatedTask })).then(() => {
+      dispatch(paginateTasks(currentPage))
       handleOpenUpdateTask();
     });
   };
@@ -76,7 +75,6 @@ const UpdateTaskForm = ({
 
   return (
     <div>
-      {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleOpenUpdateTask}></div>
       <div className="popup__window">
       <button className="x__button" onClick={handleOpenUpdateTask}>X</button>

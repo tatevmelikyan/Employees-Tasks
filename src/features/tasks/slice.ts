@@ -1,10 +1,12 @@
-import { IPagination } from "./../../types";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { INewTask, ISearchTaskParams, ITask } from "../../types";
 
 interface ITasksState {
   items: ITask[];
   paginatedItems: ITask[];
+  currentPage: number;
+  totalPages: number;
+  limit: number;
   loading: boolean;
   error: null | string;
 }
@@ -12,6 +14,9 @@ interface ITasksState {
 const initialState: ITasksState = {
   items: [],
   paginatedItems: [],
+  currentPage: 1,
+  totalPages: 0,
+  limit: 3,
   loading: false,
   error: null,
 };
@@ -127,12 +132,12 @@ const tasksSlice = createSlice({
   name: "tasks",
   initialState,
   reducers: {
-    paginateTasks: (state, { payload }) => {
-      const { page, limit } = payload;
+    paginateTasks: (state, { payload: page }: PayloadAction<number>) => {
       state.paginatedItems = state.items.slice(
-        (page - 1) * limit,
-        page * limit
+        (page - 1) * state.limit,
+        page * state.limit
       );
+      state.currentPage = page;
     },
   },
   extraReducers: (builder) => {
@@ -144,6 +149,7 @@ const tasksSlice = createSlice({
       .addCase(fetchAllTasks.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.items = payload;
+        state.totalPages = Math.ceil(state.items.length / state.limit);
       })
       .addCase(fetchAllTasks.rejected, (state, { error }) => {
         state.loading = false;

@@ -1,9 +1,9 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { FC, useState, ChangeEvent, FormEvent } from "react";
 import { ISearchTaskParams } from "../../types";
 import { useAppDispatch } from "../../app/hooks";
 import { paginateTasks, searchTask } from "./slice";
 
-const SearchTask = () => {
+const SearchTask: FC = () => {
   const dispatch = useAppDispatch();
   const [searchParams, setSearchParams] = useState<ISearchTaskParams>({
     name_like: "",
@@ -23,7 +23,7 @@ const SearchTask = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     dispatch(searchTask(searchParams)).then(() => {
-      dispatch(paginateTasks({page: 1, limit: 3}))
+      dispatch(paginateTasks(1));
     });
   };
 
@@ -58,12 +58,12 @@ const SearchTask = () => {
           <label key={field.name} htmlFor={field.name}>
             {field.placeholder}
             <input
-            type={field.type}
-            name={field.name}
-            id={field.name}
-            value={searchParams[field.name as keyof ISearchTaskParams]}
-            onChange={handleInputChange}
-          />
+              type={field.type}
+              name={field.name}
+              id={field.name}
+              value={searchParams[field.name as keyof ISearchTaskParams]}
+              onChange={handleInputChange}
+            />
           </label>
         ))}
         <button>Search</button>

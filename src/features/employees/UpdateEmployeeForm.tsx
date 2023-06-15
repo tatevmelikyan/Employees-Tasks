@@ -13,7 +13,6 @@ const UpdateEmployeeForm: FC<IUpdateEmployeeProps> = ({
   employeeId,
 }) => {
   const dispatch = useAppDispatch();
-  const loading = useAppSelector((state) => state.employees.loading);
   const currentPage = useAppSelector((state) => state.employees.currentPage);
 
   const employee = useAppSelector((state) =>
@@ -71,7 +70,6 @@ const UpdateEmployeeForm: FC<IUpdateEmployeeProps> = ({
 
   return (
     <div>
-      {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
         <button className="x__button" onClick={handleCancel}>

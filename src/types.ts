@@ -38,9 +38,3 @@ export interface ISearchTaskParams {
   endDate: string;
 }
 
-export interface IPagination {
-  currentPage: number;
-  totalPages: number;
-  dataPerPage: number;
-  totalData: number;
-} 

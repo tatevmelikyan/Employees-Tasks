@@ -9,7 +9,6 @@ interface IAddEmployeeProps {
 
 const AddEmployeeForm: FC<IAddEmployeeProps> = ({ setOpen }) => {
   const dispatch = useAppDispatch();
-  const loading = useAppSelector((state) => state.employees.loading);
   const currentPage = useAppSelector((state) => state.employees.currentPage);
 
   const [newEmployee, setNewEmployee] = useState<INewEmployee>({
@@ -64,7 +63,6 @@ const AddEmployeeForm: FC<IAddEmployeeProps> = ({ setOpen }) => {
 
   return (
     <div>
-      {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
         <button className="x__button" onClick={handleCancel}>

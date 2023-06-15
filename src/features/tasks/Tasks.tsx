@@ -20,12 +20,11 @@ const Tasks: FC = () => {
   const [taskToUpdate, setTaskToUpdate] = useState("");
   const [taskToDelete, setTaskToDelete] = useState("");
   const [deleteTaskOpen, setDeleteTaskOpen] = useState(false);
-  const limit = 3;
-  const totalPages = Math.ceil(allTasks.length / limit);
+  const totalPages = useAppSelector((state) => state.tasks.totalPages);
 
   useEffect(() => {
     dispatch(fetchAllTasks()).then(() => {
-      dispatch(paginateTasks({ page: 1, limit }));
+      dispatch(paginateTasks(1));
     });
   }, [dispatch]);
 
@@ -42,9 +41,8 @@ const Tasks: FC = () => {
   };
 
   const onPageChange = (page: number) => {
-    dispatch(paginateTasks({ page, limit }));
+    dispatch(paginateTasks(page));
   };
-
 
   return (
     <div className="tasks__page">
