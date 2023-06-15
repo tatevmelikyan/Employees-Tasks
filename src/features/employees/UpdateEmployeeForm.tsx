@@ -1,19 +1,25 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { FC, useState, ChangeEvent, FormEvent } from "react";
 import { IEmployee } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { updateEmployee } from "./slice";
+import { paginateEmployees, updateEmployee } from "./slice";
 
-const UpdateEmployeeForm = ({
-  setOpen,
-  employeeId,
-}: {
+interface IUpdateEmployeeProps {
   setOpen: (isOpen: boolean) => void;
   employeeId: string;
+}
+
+const UpdateEmployeeForm: FC<IUpdateEmployeeProps> = ({
+  setOpen,
+  employeeId,
 }) => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.employees.loading);
+  const currentPage = useAppSelector((state) => state.employees.currentPage);
+
   const employee = useAppSelector((state) =>
-    state.employees.paginatedItems.find((employee) => employee.id === employeeId)
+    state.employees.paginatedItems.find(
+      (employee) => employee.id === employeeId
+    )
   );
 
   const [updatedEmployee, setUpdatedEmployee] = useState<IEmployee>(
@@ -35,6 +41,7 @@ const UpdateEmployeeForm = ({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(updateEmployee(updatedEmployee)).then(() => {
+      dispatch(paginateEmployees(currentPage));
       handleCancel();
     });
   };
@@ -67,26 +74,28 @@ const UpdateEmployeeForm = ({
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <button className="x__button" onClick={handleCancel}>X</button>
+        <button className="x__button" onClick={handleCancel}>
+          X
+        </button>
         <h4>Update employee</h4>
         <form onSubmit={handleSubmit}>
-         <div className="form__inputs">
-           {formInputs.map((inputInfo) => {
-             return (
-               <div>
-                 <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
-                 <input
-                   type={inputInfo.type}
-                   id={inputInfo.id}
-                   name={inputInfo.id}
-                   value={updatedEmployee[inputInfo.id as keyof IEmployee]}
-                   required
-                   onChange={handleInputChange}
-                 />
-               </div>
-             );
-           })}
-         </div>
+          <div className="form__inputs">
+            {formInputs.map((inputInfo) => {
+              return (
+                <div key={inputInfo.id}>
+                  <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
+                  <input
+                    type={inputInfo.type}
+                    id={inputInfo.id}
+                    name={inputInfo.id}
+                    value={updatedEmployee[inputInfo.id as keyof IEmployee]}
+                    required
+                    onChange={handleInputChange}
+                  />
+                </div>
+              );
+            })}
+          </div>
           <button className="save__button">Save</button>
         </form>
       </div>

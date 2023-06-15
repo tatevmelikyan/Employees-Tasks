@@ -1,15 +1,17 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import { FC, useState, ChangeEvent, FormEvent } from "react";
 import { INewEmployee } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { addEmployee, fetchAllEmployees } from "./slice";
+import { addEmployee, paginateEmployees } from "./slice";
 
-const AddEmployeeForm = ({
-  setOpen,
-}: {
+interface IAddEmployeeProps {
   setOpen: (isOpen: boolean) => void;
-}) => {
+}
+
+const AddEmployeeForm: FC<IAddEmployeeProps> = ({ setOpen }) => {
   const dispatch = useAppDispatch();
   const loading = useAppSelector((state) => state.employees.loading);
+  const currentPage = useAppSelector((state) => state.employees.currentPage);
+
   const [newEmployee, setNewEmployee] = useState<INewEmployee>({
     name: "",
     surname: "",
@@ -32,6 +34,7 @@ const AddEmployeeForm = ({
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     dispatch(addEmployee(newEmployee)).then(() => {
+      dispatch(paginateEmployees(currentPage));
       handleCancel();
     });
   };
@@ -64,13 +67,15 @@ const AddEmployeeForm = ({
       {loading && <div className="loading">Loading...</div>}
       <div className="popup__background" onClick={handleCancel}></div>
       <div className="popup__window">
-        <button className="x__button" onClick={handleCancel}>X</button>
+        <button className="x__button" onClick={handleCancel}>
+          X
+        </button>
         <h4>Create Employee</h4>
         <form onSubmit={handleSubmit}>
           <div className="form__inputs">
             {formInputs.map((inputInfo) => {
               return (
-                <div>
+                <div key={inputInfo.id}>
                   <label htmlFor={inputInfo.id}>{inputInfo.label}</label>
                   <input
                     type={inputInfo.type}

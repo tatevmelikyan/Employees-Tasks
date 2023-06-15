@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
+import { FC } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { deleteEmployee } from "./slice";
+import { deleteEmployee, paginateEmployees } from "./slice";
 
-const DeleteEmployee = ({
-  setOpen,
-  employeeId,
-}: {
+interface IDeleteEmployeeProps {
   setOpen: (isOpen: boolean) => void;
   employeeId: string;
-}) => {
+}
+
+const DeleteEmployee: FC<IDeleteEmployeeProps> = ({ setOpen, employeeId }) => {
   const dispatch = useAppDispatch();
   const error = useAppSelector((state) => state.employees.error);
   const loading = useAppSelector((state) => state.employees.loading);
+  const currentPage = useAppSelector((state) => state.employees.currentPage);
 
   const handleCancel = () => {
     setOpen(false);
@@ -19,6 +19,7 @@ const DeleteEmployee = ({
 
   const handleDelete = () => {
     dispatch(deleteEmployee(employeeId)).then(() => {
+      dispatch(paginateEmployees(currentPage));
       handleCancel();
     });
   };
@@ -32,7 +33,7 @@ const DeleteEmployee = ({
         <button className="x__button" onClick={handleCancel}>
           X
         </button>
-          <h4>Delete employee</h4>
+        <h4>Delete employee</h4>
         <div className="content">
           Are you sure you want to delete this employee?
         </div>

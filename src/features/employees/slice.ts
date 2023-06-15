@@ -1,10 +1,12 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { IEmployee, INewEmployee } from "../../types";
-
 
 interface EmployeesState {
   items: IEmployee[];
   paginatedItems: IEmployee[];
+  currentPage: number;
+  totalPages: number;
+  limit: number;
   loading: boolean;
   error: string | null;
 }
@@ -12,47 +14,50 @@ interface EmployeesState {
 const initialState: EmployeesState = {
   items: [],
   paginatedItems: [],
+  currentPage: 1,
+  totalPages: 0,
+  limit: 3,
   loading: false,
   error: null,
 };
 
-const fetchAllEmployees = createAsyncThunk(
-  "employees/fetchAllEmployees",
-  async () => {
-    const response = await fetch(
-      "https://rocky-temple-83495.herokuapp.com/employees"
-    );
-    if (!response.ok) {
-      throw new Error("Failed to fetch employees");
-    }
-    const data = response.json();
-    return data;
+const fetchAllEmployees = createAsyncThunk<
+  IEmployee[],
+  void,
+  { rejectValue: string }
+>("employees/fetchAllEmployees", async (_, { rejectWithValue }) => {
+  const response = await fetch(
+    "https://rocky-temple-83495.herokuapp.com/employees"
+  );
+  if (!response.ok) {
+    return rejectWithValue("Failed to fetch employees");
   }
-);
-
-
+  const data = response.json();
+  return data;
+});
 
 const addEmployee = createAsyncThunk(
-  'employees/addEmployee',
+  "employees/addEmployee",
   async (employee: INewEmployee) => {
-    const response = await fetch('https://rocky-temple-83495.herokuapp.com/employees', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(employee),
-    });
+    const response = await fetch(
+      "https://rocky-temple-83495.herokuapp.com/employees",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(employee),
+      }
+    );
 
     if (!response.ok) {
-      throw new Error('Failed to add employee.');
+      throw new Error("Failed to add employee.");
     }
 
     const addedEmployee = await response.json();
     return addedEmployee;
   }
 );
-
-
 
 const updateEmployee = createAsyncThunk(
   "employees/updateEmployee",
@@ -95,12 +100,12 @@ const employeesSlice = createSlice({
   name: "employees",
   initialState,
   reducers: {
-    paginateEmployees: (state, { payload }) => {
-      const { page, limit } = payload;
+    paginateEmployees: (state, { payload: page }: PayloadAction<number>) => {
       state.paginatedItems = state.items.slice(
-        (page - 1) * limit,
-        page * limit
+        (page - 1) * state.limit,
+        page * state.limit
       );
+      state.currentPage = page;
     },
   },
   extraReducers: (builder) => {
@@ -113,36 +118,25 @@ const employeesSlice = createSlice({
         state.loading = false;
         state.error = null;
         state.items = payload;
+        state.totalPages = Math.ceil(state.items.length / state.limit);
       })
-      .addCase(fetchAllEmployees.rejected, (state, { error }) => {
+      .addCase(fetchAllEmployees.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = payload as string;
+      })
+      .addCase(addEmployee.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addEmployee.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.error = null;
+        state.items.push(payload);
+        state.totalPages = Math.ceil(state.items.length / state.limit);
+      })
+      .addCase(addEmployee.rejected, (state, { error }) => {
         state.loading = false;
         state.error = error.message as string;
-      })
-      // .addCase(fetchEmployeesPerPage.pending, (state) => {
-      //   state.loading = false;
-      //   state.error = null;
-      // })
-      // .addCase(fetchEmployeesPerPage.fulfilled, (state, { payload }) => {
-      //   state.loading = false;
-      //   state.error = null;
-      //   state.pageEmployees = payload;
-      // })
-      // .addCase(fetchEmployeesPerPage.rejected, (state, { error }) => {
-      //   state.loading = false;
-      //   state.error = error.message as string;
-      // })
-      .addCase(addEmployee.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(addEmployee.fulfilled, (state, {payload}) => {
-        state.loading = false
-        state.error = null
-        state.items.push(payload)
-      })
-      .addCase(addEmployee.rejected, (state, {error}) => {
-        state.loading = false
-        state.error = error.message as string
       })
       .addCase(updateEmployee.pending, (state) => {
         state.loading = true;
@@ -183,13 +177,7 @@ const employeesSlice = createSlice({
   },
 });
 
-export const {paginateEmployees} = employeesSlice.actions;
-export {
-  fetchAllEmployees,
-  // fetchEmployeesPerPage,
-  addEmployee,
-  updateEmployee,
-  deleteEmployee,
-};
+export const { paginateEmployees } = employeesSlice.actions;
+export { fetchAllEmployees, addEmployee, updateEmployee, deleteEmployee };
 
 export default employeesSlice.reducer;
