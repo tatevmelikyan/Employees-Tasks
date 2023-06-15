@@ -16,7 +16,7 @@ const initialState: EmployeesState = {
   paginatedItems: [],
   currentPage: 1,
   totalPages: 0,
-  limit: 3,
+  limit: 5,
   loading: false,
   error: null,
 };
@@ -32,58 +32,59 @@ const fetchAllEmployees = createAsyncThunk<
   if (!response.ok) {
     return rejectWithValue("Failed to fetch employees");
   }
-  const data = response.json();
+  const data = await response.json();
   return data;
 });
 
-const addEmployee = createAsyncThunk(
-  "employees/addEmployee",
-  async (employee: INewEmployee) => {
-    const response = await fetch(
-      "https://rocky-temple-83495.herokuapp.com/employees",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(employee),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to add employee.");
+const addEmployee = createAsyncThunk<
+  IEmployee,
+  INewEmployee,
+  { rejectValue: string }
+>("employees/addEmployee", async (employee, { rejectWithValue }) => {
+  const response = await fetch(
+    "https://rocky-temple-83495.herokuapp.com/employees",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(employee),
     }
+  );
 
-    const addedEmployee = await response.json();
-    return addedEmployee;
+  if (!response.ok) {
+    return rejectWithValue("Failed to add employee.");
   }
-);
+  const addedEmployee = await response.json();
+  return addedEmployee;
+});
 
-const updateEmployee = createAsyncThunk(
-  "employees/updateEmployee",
-  async (employee: IEmployee) => {
-    const response = await fetch(
-      `https://rocky-temple-83495.herokuapp.com/employees/${employee.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(employee),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to update employee.");
+const updateEmployee = createAsyncThunk<
+  IEmployee,
+  IEmployee,
+  { rejectValue: string }
+>("employees/updateEmployee", async (employee, { rejectWithValue }) => {
+  const response = await fetch(
+    `https://rocky-temple-83495.herokuapp.com/employees/${employee.id}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(employee),
     }
-    const updatedEmployee = await response.json();
-    return updatedEmployee;
-  }
-);
+  );
 
-const deleteEmployee = createAsyncThunk(
+  if (!response.ok) {
+    return rejectWithValue("Failed to update employee.");
+  }
+  const updatedEmployee = await response.json();
+  return updatedEmployee;
+});
+
+const deleteEmployee = createAsyncThunk<void, string, { rejectValue: string }>(
   "employees/deleteEmployee",
-  async (employeeId: string) => {
+  async (employeeId, { rejectWithValue }) => {
     const response = await fetch(
       `https://rocky-temple-83495.herokuapp.com/employees/${employeeId}`,
       {
@@ -91,7 +92,7 @@ const deleteEmployee = createAsyncThunk(
       }
     );
     if (!response.ok) {
-      throw new Error("Failed to delete employee");
+      return rejectWithValue("Failed to delete employee");
     }
   }
 );
@@ -134,9 +135,9 @@ const employeesSlice = createSlice({
         state.items.push(payload);
         state.totalPages = Math.ceil(state.items.length / state.limit);
       })
-      .addCase(addEmployee.rejected, (state, { error }) => {
+      .addCase(addEmployee.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       })
       .addCase(updateEmployee.pending, (state) => {
         state.loading = true;
@@ -155,9 +156,9 @@ const employeesSlice = createSlice({
           }
         }
       )
-      .addCase(updateEmployee.rejected, (state, { error }) => {
+      .addCase(updateEmployee.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       })
       .addCase(deleteEmployee.pending, (state) => {
         state.loading = true;
@@ -170,9 +171,9 @@ const employeesSlice = createSlice({
           (employee) => employee.id !== meta.arg
         );
       })
-      .addCase(deleteEmployee.rejected, (state, { error }) => {
+      .addCase(deleteEmployee.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       });
   },
 });

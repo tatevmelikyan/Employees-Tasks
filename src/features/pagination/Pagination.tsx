@@ -1,5 +1,5 @@
-import React, { FC, useState, useEffect, useRef } from "react";
-import './style.css'
+import { FC, useState, useEffect, useRef } from "react";
+import "./style.css";
 
 interface PaginationProps {
   totalPages: number;
@@ -11,6 +11,7 @@ const Pagination: FC<PaginationProps> = ({ totalPages, onPageChange }) => {
   const initialRender = useRef(true);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
     if (initialRender.current) {
       initialRender.current = false;
     } else {
@@ -41,7 +42,12 @@ const Pagination: FC<PaginationProps> = ({ totalPages, onPageChange }) => {
     for (let page = 1; page <= totalPages; page++) {
       pages.push(
         <li key={page}>
-          <button className={currentPage === page ? "active" : ""} onClick={() => handlePageChange(page)}>{page}</button>
+          <button
+            className={currentPage === page ? "active" : ""}
+            onClick={() => handlePageChange(page)}
+          >
+            {page}
+          </button>
         </li>
       );
     }

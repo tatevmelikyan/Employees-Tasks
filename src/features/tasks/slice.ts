@@ -21,21 +21,23 @@ const initialState: ITasksState = {
   error: null,
 };
 
-const fetchAllTasks = createAsyncThunk("tasks/fetchAllTasks", async () => {
-  const response = await fetch(
-    "https://rocky-temple-83495.herokuapp.com/tasks"
-  );
-  if (!response.ok) {
-    throw new Error("Failed fetching tasks");
+const fetchAllTasks = createAsyncThunk<ITask[], void, { rejectValue: string }>(
+  "tasks/fetchAllTasks",
+  async (_, { rejectWithValue }) => {
+    const response = await fetch(
+      "https://rocky-temple-83495.herokuapp.com/tasks"
+    );
+    if (!response.ok) {
+      return rejectWithValue("Failed fetching tasks");
+    }
+    const data = await response.json();
+    return data;
   }
-  const data = await response.json();
+);
 
-  return data;
-});
-
-const createTask = createAsyncThunk(
+const createTask = createAsyncThunk<ITask, INewTask, { rejectValue: string }>(
   "tasks/createTask",
-  async (task: INewTask) => {
+  async (task, { rejectWithValue }) => {
     const response = await fetch(
       "https://rocky-temple-83495.herokuapp.com/tasks",
       {
@@ -48,7 +50,7 @@ const createTask = createAsyncThunk(
     );
 
     if (!response.ok) {
-      throw new Error("Failed to create task.");
+      return rejectWithValue("Failed to create task.");
     }
 
     const createdTask = await response.json();
@@ -56,9 +58,9 @@ const createTask = createAsyncThunk(
   }
 );
 
-const updateTask = createAsyncThunk<ITask, { task: ITask }>(
+const updateTask = createAsyncThunk<ITask, ITask, { rejectValue: string }>(
   "tasks/updateTask",
-  async ({ task }) => {
+  async (task, { rejectWithValue }) => {
     const response = await fetch(
       `https://rocky-temple-83495.herokuapp.com/tasks/${task.id}`,
       {
@@ -71,25 +73,23 @@ const updateTask = createAsyncThunk<ITask, { task: ITask }>(
     );
 
     if (!response.ok) {
-      throw new Error("Failed to update task");
+      return rejectWithValue("Failed to update task");
     }
     const updatedTask = await response.json();
     return updatedTask;
   }
 );
 
-const deleteTask = createAsyncThunk<string, string, { rejectValue: string }>(
+const deleteTask = createAsyncThunk<void, string, { rejectValue: string }>(
   "tasks/deleteTask",
   async (taskId, { rejectWithValue }) => {
-    try {
-      const response = await fetch(
-        `https://rocky-temple-83495.herokuapp.com/tasks/${taskId}`,
-        {
-          method: "DELETE",
-        }
-      );
-      return taskId;
-    } catch (error) {
+    const response = await fetch(
+      `https://rocky-temple-83495.herokuapp.com/tasks/${taskId}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (!response.ok) {
       return rejectWithValue("Failed to delete task");
     }
   }
@@ -115,16 +115,12 @@ const searchTask = createAsyncThunk<
       .filter(Boolean)
       .join("&");
     let url = `https://rocky-temple-83495.herokuapp.com/tasks?${queryParams}`;
-    try {
-      const response = await fetch(url);
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error();
-      }
-    } catch (err) {
+    const response = await fetch(url);
+    if (!response.ok) {
       return rejectWithValue("Failed to fetch tasks");
     }
+    const data = await response.json();
+    return data;
   }
 );
 
@@ -151,9 +147,9 @@ const tasksSlice = createSlice({
         state.items = payload;
         state.totalPages = Math.ceil(state.items.length / state.limit);
       })
-      .addCase(fetchAllTasks.rejected, (state, { error }) => {
+      .addCase(fetchAllTasks.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       })
       .addCase(createTask.pending, (state) => {
         state.loading = true;
@@ -163,9 +159,9 @@ const tasksSlice = createSlice({
         state.loading = false;
         state.items.push(payload);
       })
-      .addCase(createTask.rejected, (state, { error }) => {
+      .addCase(createTask.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       })
       .addCase(updateTask.pending, (state) => {
         state.loading = true;
@@ -180,21 +176,21 @@ const tasksSlice = createSlice({
           state.items[index] = updatedTask;
         }
       })
-      .addCase(updateTask.rejected, (state, { error }) => {
+      .addCase(updateTask.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = error.message as string;
+        state.error = payload as string;
       })
       .addCase(deleteTask.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(deleteTask.fulfilled, (state, { payload }) => {
+      .addCase(deleteTask.fulfilled, (state, { meta }) => {
         state.loading = false;
-        state.items = state.items.filter((task) => task.id !== payload);
+        state.items = state.items.filter((task) => task.id !== meta.arg);
       })
       .addCase(deleteTask.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = payload || "An error occurred.";
+        state.error = payload as string;
       })
       .addCase(searchTask.pending, (state) => {
         state.loading = true;
@@ -206,7 +202,7 @@ const tasksSlice = createSlice({
       })
       .addCase(searchTask.rejected, (state, { payload }) => {
         state.loading = false;
-        state.error = payload || "An error occurred";
+        state.error = payload as string;
       });
   },
 });

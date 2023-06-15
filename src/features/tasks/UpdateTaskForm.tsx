@@ -39,7 +39,7 @@ const UpdateTaskForm: FC<IUpdateTaskProps> = ({handleOpenUpdateTask,taskId}) => 
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    dispatch(updateTask({ task: updatedTask })).then(() => {
+    dispatch(updateTask(updatedTask)).then(() => {
       dispatch(paginateTasks(currentPage))
       handleOpenUpdateTask();
     });

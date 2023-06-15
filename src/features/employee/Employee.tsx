@@ -15,8 +15,8 @@ const Employee: FC = () => {
 
   useEffect(() => {
     if (id) {
-      dispatch(fetchEmployee({ id }));
-      dispatch(fetchEmployeeTasks({ id }));
+      dispatch(fetchEmployee(id));
+      dispatch(fetchEmployeeTasks(id));
     }
   }, [id, dispatch]);
   return (
